@@ -14,11 +14,12 @@ func Init(r *gin.Engine) {
 	r.Use(middleware.Cors())
 
 	r.POST("/auth/login", api.Auth.Login)
-	r.GET("/auth/captcha", api.Auth.Captcha)
+	r.GET("/auth/captcha", api.Auth.Captcha) // 获取验证码
 
 	r.Use(middleware.Jwt())
 	r.POST("/auth/logout", api.Auth.Logout)
-	r.POST("/auth/password", api.Auth.Logout)
+	r.POST("/auth/password", api.Auth.Logout)             //TODO
+	r.GET("/auth/refresh/:expire", api.Auth.RefreshToken) // 刷新token有效期
 
 	r.GET("/user", api.User.List)
 	r.POST("/user", api.User.Add)

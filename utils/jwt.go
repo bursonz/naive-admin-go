@@ -17,7 +17,8 @@ var (
 
 // CustomClaims 载荷，可以加一些自己需要的信息
 type CustomClaims struct {
-	UID int
+	UID int // 用户id
+	//URole int // 用户角色
 	jwt.RegisteredClaims
 }
 
@@ -29,7 +30,7 @@ type JWT struct {
 // NewJWT 新建一个jwt实例
 func NewJWT() *JWT {
 	return &JWT{
-		SigningKey:[]byte(os.Getenv("JWT_SIGNING_KEY")),
+		SigningKey: []byte(os.Getenv("JWT_SIGNING_KEY")),
 	}
 }
 
@@ -39,8 +40,8 @@ func (j *JWT) createToken(claims CustomClaims) (string, error) {
 	return token.SignedString(j.SigningKey)
 }
 
-// GenerateToken 生成令牌
-func GenerateToken( uId int) string {
+// GenerateToken 生成令牌，有效期为1小时
+func GenerateToken(uId int) string {
 	j := NewJWT()
 	type cus struct {
 		UID int
@@ -53,7 +54,7 @@ func GenerateToken( uId int) string {
 		},
 	}
 
-	token, err :=  j.createToken(CustomClaims(claims))
+	token, err := j.createToken(CustomClaims(claims))
 	if err != nil {
 
 		return err.Error()
@@ -62,7 +63,28 @@ func GenerateToken( uId int) string {
 	return token
 }
 
-// RefreshToken 更新token
+// GenerateTokenWithExpire 生成令牌，有效期为expire小时
+func GenerateTokenWithExpire(uId int, expire int) string {
+	j := NewJWT()
+	type cus struct {
+		UID int
+		jwt.RegisteredClaims
+	}
+	claims := cus{
+		uId,
+		jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * time.Duration(expire))),
+		},
+	}
+	token, err := j.createToken(CustomClaims(claims))
+	if err != nil {
+		return err.Error()
+	}
+	//log.Println("--->生成的token-->：" + token)
+	return token
+}
+
+// RefreshToken 更新token，有效期延长为1小时
 func (j *JWT) RefreshToken(tokenString string) (string, error) {
 	jwt.TimeFunc = func() time.Time {
 		return time.Unix(0, 0)
@@ -75,11 +97,30 @@ func (j *JWT) RefreshToken(tokenString string) (string, error) {
 	}
 	if claims, ok := token.Claims.(*CustomClaims); ok && token.Valid {
 		jwt.TimeFunc = time.Now
-		claims.ExpiresAt =jwt.NewNumericDate(time.Now().Add(time.Hour))
+		claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Hour))
 		return j.createToken(*claims)
 	}
 	return "", TokenInvalid
 }
+
+//// RefreshTokenWithExpire 更新token，有效期延长为expire小时
+//func (j *JWT) RefreshTokenWithExpire(tokenString string, expire int) (string, error) {
+//	jwt.TimeFunc = func() time.Time {
+//		return time.Unix(0, 0)
+//	}
+//	token, err := jwt.ParseWithClaims(tokenString, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+//		return j.SigningKey, nil
+//	})
+//	if err != nil {
+//		return "", err
+//	}
+//	if claims, ok := token.Claims.(*CustomClaims); ok && token.Valid {
+//		jwt.TimeFunc = time.Now
+//		claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Hour * time.Duration(expire)))
+//		return j.createToken(*claims)
+//	}
+//	return "", TokenInvalid
+//}
 
 // ParseToken 解析 Tokne
 func (j *JWT) ParseToken(tokenString string) (*CustomClaims, error) {
@@ -108,4 +149,3 @@ func (j *JWT) ParseToken(tokenString string) (*CustomClaims, error) {
 	}
 	return nil, TokenInvalid
 }
-
