@@ -13,5 +13,3 @@ func MiddleWare() gin.HandlerFunc {
 		fmt.Println("before middleware")
 	}
 }
-
-

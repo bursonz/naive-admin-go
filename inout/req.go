@@ -84,3 +84,20 @@ type PatchPermissionReq struct {
 	KeepAlive int    `json:"keepAlive"`
 	Order     int    `json:"order"`
 }
+
+type AddStationReq struct {
+	Code        string `json:"code" binding:"required"`
+	Name        string `json:"name" binding:"required"`
+	AdminUserId int    `json:"adminUserId" binding:"required"`
+	Location    string `json:"location"`
+	StationType string `json:"stationType"`
+}
+
+type PatchStationReq struct {
+	Id          int    `json:"id" binding:"required"` // 必须要带id，其他都可以不更新
+	Code        string `json:"code"`
+	Name        string `json:"name"`
+	AdminUserId int    `json:"adminUserId"`
+	Location    string `json:"location"`
+	StationType string `json:"stationType"`
+}

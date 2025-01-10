@@ -43,4 +43,9 @@ func Init(r *gin.Engine) {
 	r.DELETE("/permission/:id", api.Permissions.Delete)
 	r.GET("/permission/tree", api.Permissions.List)
 	r.GET("/permission/menu/tree", api.Permissions.List)
+
+	r.GET("/station", api.Station.List)
+	r.POST("/station", api.Station.Add)
+	r.PATCH("/station/:id", api.Station.Update)
+	r.DELETE("/station/:id", api.Station.Delete)
 }

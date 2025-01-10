@@ -5,6 +5,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"log"
+	"naive-admin-go/model"
 	"os"
 	"time"
 )
@@ -22,19 +23,28 @@ func Init() {
 			LogLevel:                  logger.Info,
 		},
 	)
-	openDb, err := gorm.Open(mysql.Open(os.Getenv("Mysql")),&gorm.Config{
+	openDb, err := gorm.Open(mysql.Open(os.Getenv("Mysql")), &gorm.Config{
 		Logger:                                   dbLogger,
 		DisableForeignKeyConstraintWhenMigrating: true,
 	})
 	if err != nil {
-		log.Fatalf("db connection error is %s",err.Error())
+		log.Fatalf("db connection error is %s", err.Error())
 	}
-	dbCon,err := openDb.DB()
+	dbCon, err := openDb.DB()
 	if err != nil {
-		log.Fatalf("openDb.DB error is  %s",err.Error())
+		log.Fatalf("openDb.DB error is  %s", err.Error())
 	}
 	dbCon.SetMaxIdleConns(3)
 	dbCon.SetMaxOpenConns(10)
 	dbCon.SetConnMaxLifetime(time.Hour)
 	Dao = openDb
+}
+
+func AutoMigrate() error {
+	if err := Dao.AutoMigrate(
+		&model.Station{},
+	); err != nil {
+		return err
+	}
+	return nil
 }

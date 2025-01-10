@@ -14,6 +14,12 @@ func main() {
 	app := gin.Default()
 	config.Init()
 	db.Init()
+	if err := db.AutoMigrate(); err != nil {
+		panic(err)
+	}
 	router.Init(app)
-	app.Run(":8800")
+
+	if err := app.Run(":8800"); err != nil {
+		panic(err)
+	}
 }

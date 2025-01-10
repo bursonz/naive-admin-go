@@ -9,7 +9,7 @@ import (
 	svg "github.com/ajstarks/svgo"
 )
 
-func GenerateSVG(width, height int) ([]byte,string) {
+func GenerateSVG(width, height int) ([]byte, string) {
 	rand.Seed(time.Now().UnixNano())
 
 	var svgContent bytes.Buffer
@@ -23,6 +23,5 @@ func GenerateSVG(width, height int) ([]byte,string) {
 
 	canvas.End()
 
-	return svgContent.Bytes(),code
+	return svgContent.Bytes(), code
 }
-
