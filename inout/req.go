@@ -101,3 +101,35 @@ type PatchStationReq struct {
 	Location    string `json:"location"`
 	StationType string `json:"stationType"`
 }
+
+type AddLockReq struct {
+	StationId       int    `json:"stationId" binding:"required"`
+	AdminId         int    `json:"adminId" binding:"required"`
+	SN              int    `json:"sn" binding:"required"`
+	MAC             string `json:"mac" binding:"required"`
+	FactoryId       int    `json:"factoryId" binding:"required"`
+	CurrentKey      string `json:"currentKey"  binding:"required" comment:"当前密钥"`
+	FactoryKey      string `json:"factoryKey" binding:"required" comment:"出厂密钥"`
+	SoftwareVersion string `json:"softwareVersion"`
+	HardwareVersion string `json:"hardwareVersion"`
+	Location        string `json:"location"`
+	Power           int    `json:"power"`
+	Description     string `json:"description"`
+	Enable          bool   `json:"enable" binding:"required" comment:"1: 启用 0: 禁用"`
+}
+type PatchLockReq struct {
+	ID              int    `json:"id" binding:"required"`
+	StationId       int    `json:"stationId"`
+	AdminId         int    `json:"adminId"`
+	SN              int    `json:"sn"`
+	MAC             string `json:"mac"`
+	FactoryId       int    `json:"factoryId"`
+	CurrentKey      string `json:"currentKey"`
+	FactoryKey      string `json:"factoryKey"`
+	SoftwareVersion string `json:"softwareVersion"`
+	HardwareVersion string `json:"hardwareVersion"`
+	Location        string `json:"location"`
+	Power           int    `json:"power"`
+	Description     string `json:"description"`
+	Enable          bool   `json:"enable"`
+}

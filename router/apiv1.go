@@ -48,4 +48,9 @@ func Init(r *gin.Engine) {
 	r.POST("/station", api.Station.Add)
 	r.PATCH("/station/:id", api.Station.Update)
 	r.DELETE("/station/:id", api.Station.Delete)
+
+	r.GET("/lock", api.Lock.List)
+	r.POST("/lock", api.Lock.Add)
+	r.PATCH("/lock/:id", api.Lock.Update)
+	r.DELETE("/lock/:id", api.Lock.Delete)
 }

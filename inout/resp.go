@@ -43,3 +43,13 @@ type RoleListPageRes struct {
 	PageData []RoleListPageItem `json:"pageData"`
 	Total    int64              `json:"total"`
 }
+
+type StationListRes struct {
+	PageData []model.Station `json:"pageData"`
+	Total    int64           `json:"total"`
+}
+
+type LockListRes struct {
+	PageData []model.Lock `json:"pageData"`
+	Total    int64        `json:"total"`
+}

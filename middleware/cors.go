@@ -11,6 +11,7 @@ func Cors() gin.HandlerFunc {
 		// 核心处理方式
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization")
+		c.Header("Access-Control-Allow-Credentials", "true")
 		c.Header("Access-Control-Allow-Methods", "GET, OPTIONS, POST, PUT, DELETE")
 		c.Set("content-type", "application/json")
 		//放行所有OPTIONS方法

@@ -16,7 +16,7 @@ var Station = &station{}
 
 // List 获取所有站点
 func (station) List(c *gin.Context) {
-	var data []model.Station
+	var data inout.StationListRes
 	// 查询条件 TODO 其他条件
 	var code = c.DefaultQuery("code", "")
 	var name = c.DefaultQuery("name", "")
@@ -37,7 +37,8 @@ func (station) List(c *gin.Context) {
 	if stationType != "" {
 		orm = orm.Where("station_type = ?", stationType)
 	}
-	orm.Offset((pageNo - 1) * pageSize).Limit(pageSize).Order("id desc").Find(&data)
+	orm.Count(&data.Total)
+	orm.Offset((pageNo - 1) * pageSize).Limit(pageSize).Order("id desc").Find(&data.PageData)
 	//db.Dao.Model(&model.Station{}).Find(&data)
 	Resp.Succ(c, data)
 }

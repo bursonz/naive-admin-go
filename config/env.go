@@ -5,7 +5,8 @@ import (
 	"log"
 	"os"
 )
-func Init()  {
+
+func Init() {
 	err := godotenv.Load(".env") // 加载.env文件
 	if err != nil {
 		log.Fatal("Error loading .env file", err)
