@@ -37,6 +37,7 @@ func (user) List(c *gin.Context) {
 	var gender = c.DefaultQuery("gender", "")
 	var enable = c.DefaultQuery("enable", "")
 	var username = c.DefaultQuery("username", "")
+	var phone = c.DefaultQuery("phone", "")
 	var pageNoReq = c.DefaultQuery("pageNo", "1")
 	var pageSizeReq = c.DefaultQuery("pageSize", "10")
 	pageNo, _ := strconv.Atoi(pageNoReq)
@@ -52,7 +53,9 @@ func (user) List(c *gin.Context) {
 	if username != "" {
 		orm = orm.Where("nickName like ?", "%"+username+"%")
 	}
-
+	if phone != "" {
+		orm = orm.Where("phone like ?", "%"+phone+"%")
+	}
 	orm.Count(&data.Total)
 	orm.Offset((pageNo - 1) * pageSize).Limit(pageSize).Find(&profileList)
 	for _, datum := range profileList {
@@ -70,6 +73,7 @@ func (user) List(c *gin.Context) {
 			Avatar:     datum.Avatar,
 			Address:    datum.Address,
 			Email:      datum.Email,
+			Phone:      datum.Phone,
 			Roles:      rols,
 		})
 	}
@@ -88,6 +92,7 @@ func (user) Profile(c *gin.Context) {
 		Address:  params.Address,
 		Email:    params.Email,
 		NickName: params.NickName,
+		Phone:    params.Phone,
 	}).Error
 	if err != nil {
 		Resp.Err(c, 20001, err.Error())
@@ -149,7 +154,7 @@ func (user) Add(c *gin.Context) {
 		}
 		tx.Create(&model.Profile{
 			UserId:   newUser.ID,
-			NickName: newUser.Username,
+			NickName: &newUser.Username,
 		})
 		for _, id := range params.RoleIds {
 			tx.Create(&model.UserRolesRole{

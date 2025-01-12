@@ -25,10 +25,11 @@ type UserListItem struct {
 	Enable     bool          `json:"enable"`
 	CreateTime time.Time     `json:"createTime"`
 	UpdateTime time.Time     `json:"updateTime"`
-	Gender     int           `json:"gender"`
+	Gender     *int          `json:"gender"`
 	Avatar     string        `json:"avatar"`
-	Address    string        `json:"address"`
-	Email      string        `json:"email"`
+	Address    *string       `json:"address"`
+	Email      *string       `json:"email"`
+	Phone      *string       `json:"phone"`
 	Roles      []*model.Role `json:"roles"`
 }
 type UserListRes struct {
@@ -45,11 +46,11 @@ type RoleListPageRes struct {
 }
 
 type StationListRes struct {
-	PageData []model.Station `json:"pageData"`
-	Total    int64           `json:"total"`
+	PageData []*model.Station `json:"pageData"`
+	Total    int64            `json:"total"`
 }
 
 type LockListRes struct {
-	PageData []model.Lock `json:"pageData"`
-	Total    int64        `json:"total"`
+	PageData []*model.Lock `json:"pageData"`
+	Total    int64         `json:"total"`
 }

@@ -17,11 +17,12 @@ type PatchUserReq struct {
 	Username *string `json:"username,omitempty"`
 }
 type PatchProfileUserReq struct {
-	Id       int    `json:"id"  binding:"required"`
-	Gender   int    `json:"gender"`
-	NickName string `json:"nickName"`
-	Address  string `json:"address"`
-	Email    string `json:"email"`
+	Id       int     `json:"id"  binding:"required"`
+	Gender   *int    `json:"gender"`
+	NickName *string `json:"nickName"`
+	Address  *string `json:"address"`
+	Email    *string `json:"email"`
+	Phone    *string `json:"phone"`
 }
 type EnableRoleReq struct {
 	Enable bool `json:"enable" binding:"required"`

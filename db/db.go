@@ -42,6 +42,7 @@ func Init() {
 
 func AutoMigrate() error {
 	if err := Dao.AutoMigrate(
+		&model.Profile{},
 		&model.Station{},
 		&model.Lock{},
 	); err != nil {
