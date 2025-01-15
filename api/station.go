@@ -7,7 +7,6 @@ import (
 	"naive-admin-go/inout"
 	"naive-admin-go/model"
 	"strconv"
-	"time"
 )
 
 type station struct{}
@@ -21,12 +20,11 @@ func (station) List(c *gin.Context) {
 	var code = c.DefaultQuery("code", "")
 	var name = c.DefaultQuery("name", "")
 	var stationType = c.DefaultQuery("stationType", "")
-	// 分页
 	var pageNoReq = c.DefaultQuery("pageNo", "1")
 	var pageSizeReq = c.DefaultQuery("pageSize", "10")
 	pageNo, _ := strconv.Atoi(pageNoReq)
 	pageSize, _ := strconv.Atoi(pageSizeReq)
-	// 查询
+	// 条件查询
 	var orm = db.Dao.Model(&model.Station{})
 	if code != "" {
 		orm = orm.Where("code = ?", code)
@@ -37,9 +35,14 @@ func (station) List(c *gin.Context) {
 	if stationType != "" {
 		orm = orm.Where("station_type = ?", stationType)
 	}
+	// 查询总数
 	orm.Count(&data.Total)
-	orm.Offset((pageNo - 1) * pageSize).Limit(pageSize).Order("id desc").Find(&data.PageData)
-	//db.Dao.Model(&model.Station{}).Find(&data)
+	// 分页查询
+	if pageNo < 1 {
+		orm.Find(&data.PageData)
+	} else {
+		orm.Offset((pageNo - 1) * pageSize).Limit(pageSize).Order("id desc").Find(&data.PageData)
+	}
 	Resp.Succ(c, data)
 }
 
@@ -55,7 +58,6 @@ func (station) Update(c *gin.Context) {
 		AdminUserId: params.AdminUserId,
 		Location:    params.Location,
 		StationType: params.StationType,
-		UpdateTime:  time.Now(),
 	}).Error; err != nil {
 		Resp.Err(c, 20001, err.Error())
 		return
@@ -82,8 +84,6 @@ func (station) Add(c *gin.Context) {
 		AdminUserId: params.AdminUserId,
 		Location:    params.Location,
 		StationType: params.StationType,
-		CreateTime:  time.Now(),
-		UpdateTime:  time.Now(),
 	}
 
 	if err := db.Dao.Create(&newStation).Error; err != nil {

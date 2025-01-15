@@ -54,7 +54,7 @@ func (lock) Update(c *gin.Context) {
 		Resp.Err(c, 20001, err.Error())
 		return
 	}
-	if err := db.Dao.Model(&model.Lock{}).Where("id=?", params.ID).Updates(&model.Lock{
+	if err := db.Dao.Model(&model.Lock{}).Where("id=?", params.Id).Updates(&model.Lock{
 		StationId:       params.StationId,
 		AdminId:         params.AdminId,
 		SN:              params.SN,

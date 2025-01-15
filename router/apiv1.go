@@ -18,8 +18,8 @@ func Init(r *gin.Engine) {
 
 	r.Use(middleware.Jwt())
 	r.POST("/auth/logout", api.Auth.Logout)
-	r.POST("/auth/password", api.Auth.Logout)             //TODO
-	r.GET("/auth/refresh/:expire", api.Auth.RefreshToken) // 刷新token有效期
+	r.POST("/auth/password", api.Auth.Logout) //TODO 更换加密组件bcrypt
+	r.GET("/auth/refresh/:expire", api.Auth.RefreshToken)
 
 	r.GET("/user", api.User.List)
 	r.POST("/user", api.User.Add)
@@ -53,4 +53,19 @@ func Init(r *gin.Engine) {
 	r.POST("/lock", api.Lock.Add)
 	r.PATCH("/lock/:id", api.Lock.Update)
 	r.DELETE("/lock/:id", api.Lock.Delete)
+
+	r.GET("/order", api.Order.List)
+	r.POST("/order", api.Order.Add)
+	r.PATCH("/order/:id", api.Order.Update) // 工单创建后不可修改
+	r.DELETE("/order/:id", api.Order.Delete)
+
+	r.GET("/order/approval", api.OrderApproval.List)
+	r.POST("/order/approval", api.OrderApproval.Add)
+	r.PATCH("/order/approval/:id", api.OrderApproval.Update)
+	r.DELETE("/order/approval/:id", api.OrderApproval.Delete)
+
+	r.GET("/order/step", api.OrderStep.List)
+	r.POST("/order/step", api.OrderStep.Add)
+	r.PATCH("/order/step/:id", api.OrderStep.Update)
+	r.DELETE("/order/step/:id", api.OrderStep.Delete)
 }

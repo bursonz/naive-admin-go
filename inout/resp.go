@@ -54,3 +54,18 @@ type LockListRes struct {
 	PageData []*model.Lock `json:"pageData"`
 	Total    int64         `json:"total"`
 }
+
+type OrderListRes struct {
+	PageData []*model.Order `json:"pageData"`
+	Total    int64          `json:"total"`
+}
+
+type OrderApprovalListRes struct {
+	PageData []*model.OrderApproval `json:"pageData"`
+	Total    int64                  `json:"total"`
+}
+
+type OrderStepListRes struct {
+	PageData []*model.OrderStep `json:"pageData"`
+	Total    int64              `json:"total"`
+}
