@@ -184,3 +184,20 @@ func (user) Delete(c *gin.Context) {
 	}
 	Resp.Succ(c, "")
 }
+func (user) BatchDelete(c *gin.Context) {
+	ids := c.QueryArray("id")
+	if err := db.Dao.Transaction(func(tx *gorm.DB) error {
+		for _, uid := range ids {
+			tx.Where("id =?", uid).Delete(&model.User{})
+			tx.Where("userId =?", uid).Delete(&model.UserRolesRole{})
+			tx.Where("userId =?", uid).Delete(&model.Profile{})
+			// TODO 删除用户相关的所有数据
+		}
+		return nil
+	}); err != nil {
+		Resp.Err(c, 20001, err.Error())
+		return
+	} else {
+		Resp.Succ(c, "批量删除成功")
+	}
+}

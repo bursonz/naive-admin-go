@@ -68,4 +68,11 @@ func Init(r *gin.Engine) {
 	r.POST("/order/step", api.OrderStep.Add)
 	r.PATCH("/order/step/:id", api.OrderStep.Update)
 	r.DELETE("/order/step/:id", api.OrderStep.Delete)
+
+	r.DELETE("/users", api.User.BatchDelete)
+	r.DELETE("/stations", api.Station.BatchDelete)
+	r.DELETE("/locks", api.Lock.BatchDelete)
+	r.DELETE("/orders", api.Order.BatchDelete)
+	r.DELETE("/order/approvals", api.OrderApproval.BatchDelete)
+	r.DELETE("/order/steps", api.OrderStep.BatchDelete)
 }

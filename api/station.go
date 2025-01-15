@@ -98,11 +98,41 @@ func (station) Delete(c *gin.Context) {
 	sid := c.Param("id")
 	if err := db.Dao.Transaction(func(tx *gorm.DB) error {
 		tx.Where("id =?", sid).Delete(&model.Station{})
-		// TODO 级联删除与站点相关的锁、工单
+		tx.Where("station_id=?", sid).Delete(&model.Lock{})
+		var oldOrders []model.Order
+		tx.Where("station_id=?", sid).Find(&oldOrders)
+		for _, odr := range oldOrders {
+			tx.Where("order_id=?", odr.ID).Delete(&model.OrderApproval{})
+			tx.Where("order_id=?", odr.ID).Delete(&model.OrderStep{})
+			tx.Where("order_id=?", odr.ID).Delete(&model.Order{})
+		}
 		return nil
 	}); err != nil {
 		Resp.Err(c, 20001, err.Error())
 		return
 	}
 	Resp.Succ(c, "")
+}
+
+func (station) BatchDelete(c *gin.Context) {
+	ids := c.QueryArray("id")
+	if err := db.Dao.Transaction(func(tx *gorm.DB) error {
+		for _, id := range ids {
+			tx.Where("id =?", id).Delete(&model.Station{})
+			tx.Where("station_id=?", id).Delete(&model.Lock{})
+			var oldOrders []model.Order
+			tx.Where("station_id=?", id).Find(&oldOrders)
+			for _, odr := range oldOrders {
+				tx.Where("order_id=?", odr.ID).Delete(&model.OrderApproval{})
+				tx.Where("order_id=?", odr.ID).Delete(&model.OrderStep{})
+				tx.Where("order_id=?", odr.ID).Delete(&model.Order{})
+			}
+		}
+		return nil
+	}); err != nil {
+		Resp.Err(c, 20001, err.Error())
+		return
+	} else {
+		Resp.Succ(c, "批量删除成功")
+	}
 }

@@ -117,3 +117,26 @@ func (lock) List(c *gin.Context) {
 	// 返回
 	Resp.Succ(c, data)
 }
+
+func (lock) BatchDelete(c *gin.Context) {
+	ids := c.QueryArray("id")
+	if err := db.Dao.Transaction(func(tx *gorm.DB) error {
+		for _, id := range ids {
+			tx.Where("id =?", id).Delete(&model.Lock{})
+			var oldOrderSteps []model.OrderStep
+			tx.Where("lock_id =?", id).Find(&oldOrderSteps)
+			for _, orderStep := range oldOrderSteps {
+				tx.Where("order_id =?", orderStep.OrderId).Delete(&model.OrderApproval{})
+				tx.Where("order_id =?", orderStep.OrderId).Delete(&model.Order{})
+				tx.Where("order_id =?", orderStep.OrderId).Delete(&model.OrderStep{})
+			}
+		}
+		return nil
+	}); err != nil {
+		Resp.Err(c, 20001, err.Error())
+		return
+	} else {
+		Resp.Succ(c, "批量删除成功")
+	}
+
+}
