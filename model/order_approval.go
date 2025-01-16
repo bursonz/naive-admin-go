@@ -9,3 +9,7 @@ type OrderApproval struct {
 	Comment    *string `json:"comment"`    // 审批意见
 	Sort       int     `json:"sort"`       // 审批顺序 1,2,3,...10
 }
+
+func (OrderApproval) TableName() string {
+	return "order_approval"
+}

@@ -14,3 +14,5 @@ type OrderStep struct {
 	ImageUrl   *string `json:"imageUrl"`   // 图片url
 	Comment    *string `json:"comment"`    // 状态量
 }
+
+func (OrderStep) TableName() string { return "order_step" }
