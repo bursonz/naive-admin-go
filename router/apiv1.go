@@ -75,4 +75,7 @@ func Init(r *gin.Engine) {
 	r.DELETE("/orders", api.Order.BatchDelete)
 	r.DELETE("/order/approvals", api.OrderApproval.BatchDelete)
 	r.DELETE("/order/steps", api.OrderStep.BatchDelete)
+
+	r.GET("/f/:filename", api.File.Download)
+	r.POST("/f/:filename", api.File.Upload)
 }
