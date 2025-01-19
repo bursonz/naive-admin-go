@@ -34,7 +34,7 @@ func (order) Add(c *gin.Context) {
 			newApproval := model.OrderApproval{
 				OrderId:    newOrder.ID,
 				ApproverId: approval.ApproverId,
-				Status:     0,
+				Status:     1,
 				Comment:    approval.Comment,
 				Sort:       i + 1, // TODO 或换成approval.Sort
 			}
@@ -49,7 +49,7 @@ func (order) Add(c *gin.Context) {
 				Task:       step.Task,
 				Sort:       i + 1,
 				ReviewerId: step.ReviewerId,
-				Status:     0,
+				Status:     4,
 				LockId:     step.LockId,
 				LockStatus: step.LockStatus,
 				ImageUrl:   step.ImageUrl,
@@ -125,7 +125,7 @@ func (order) List(c *gin.Context) {
 	if pageNo < 1 { // pageNo 小于1 时，查询所有
 		orm.Find(&data.PageData)
 	} else {
-		orm.Offset((pageNo - 1) * pageSize).Limit(pageSize).Order("sort asc").Find(&data.PageData)
+		orm.Offset((pageNo - 1) * pageSize).Limit(pageSize).Find(&data.PageData)
 	}
 	Resp.Succ(c, data)
 }
