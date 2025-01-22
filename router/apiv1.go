@@ -53,6 +53,7 @@ func Init(r *gin.Engine) {
 	r.POST("/lock", api.Lock.Add)
 	r.PATCH("/lock/:id", api.Lock.Update)
 	r.DELETE("/lock/:id", api.Lock.Delete)
+	r.POST("/lock/command", api.Lock.Command)
 
 	r.GET("/order", api.Order.List)
 	r.POST("/order", api.Order.Add)

@@ -104,36 +104,41 @@ type PatchStationReq struct {
 }
 
 type AddLockReq struct {
-	StationId       int    `json:"stationId" binding:"required"`
-	AdminId         int    `json:"adminId" binding:"required"`
-	SN              int    `json:"sn" binding:"required"`
-	MAC             string `json:"mac" binding:"required"`
-	FactoryId       int    `json:"factoryId" binding:"required"`
-	CurrentKey      string `json:"currentKey"  binding:"required" comment:"当前密钥"`
-	FactoryKey      string `json:"factoryKey" binding:"required" comment:"出厂密钥"`
-	SoftwareVersion string `json:"softwareVersion"`
-	HardwareVersion string `json:"hardwareVersion"`
-	Location        string `json:"location"`
-	Power           int    `json:"power"`
-	Description     string `json:"description"`
-	Enable          bool   `json:"enable" binding:"required" comment:"1: 启用 0: 禁用"`
+	StationId   uint   `json:"stationId" binding:"required"`
+	AdminId     uint   `json:"adminId" binding:"required"`
+	SN          string `json:"sn" binding:"required"`
+	MAC         string `json:"mac" binding:"required"`
+	FactoryId   string `json:"factoryId"`
+	CurrentKey  string `json:"currentKey"  binding:"required" comment:"当前密钥"`
+	FactoryKey  string `json:"factoryKey" binding:"required" comment:"出厂密钥"`
+	Location    string `json:"location"`
+	Description string `json:"description"`
+	Enable      bool   `json:"enable" comment:"1: 启用 0: 禁用"`
 }
 type PatchLockReq struct {
-	Id              int    `json:"id" binding:"required"`
-	StationId       int    `json:"stationId"`
-	AdminId         int    `json:"adminId"`
-	SN              int    `json:"sn"`
-	MAC             string `json:"mac"`
-	FactoryId       int    `json:"factoryId"`
-	CurrentKey      string `json:"currentKey"`
-	FactoryKey      string `json:"factoryKey"`
-	SoftwareVersion string `json:"softwareVersion"`
-	HardwareVersion string `json:"hardwareVersion"`
-	Location        string `json:"location"`
-	Power           int    `json:"power"`
-	Description     string `json:"description"`
-	Enable          bool   `json:"enable"`
+	Id          uint    `json:"id" binding:"required"`
+	StationId   *uint   `json:"stationId"`
+	AdminId     *uint   `json:"adminId"`
+	SN          *string `json:"sn"`
+	MAC         *string `json:"mac"`
+	FactoryId   *string `json:"factoryId"`
+	CurrentKey  *string `json:"currentKey"`
+	FactoryKey  *string `json:"factoryKey"`
+	Location    *string `json:"location"`
+	Description *string `json:"description"`
+	Enable      *bool   `json:"enable"`
+	AlarmMode   *string `json:"alarmMode" comment:"0x00:不报警，0x01:迟钝模式，0x02:中等模式，0x03:敏感模式"`
+	Muted       *string `json:"muted" comment:"0x00静音模式关闭，0x01静音模式打开，其他错误"`
+	Hibernate   *string `json:"hibernate" comment:"0x00:正常休眠，0x01:Blue常开，0x02:省电模式"`
 }
+
+type LockCommandReq struct {
+	Id   uint    `json:"id" binding:"required"`
+	Roll byte    `json:"roll" binding:"required"`
+	Type *byte   `json:"type"`
+	Cmd  *[]byte `json:"cmd"`
+}
+
 type AddOrderReq struct {
 	StationId      uint                   `json:"stationId" binding:"required"`
 	DispatcherId   uint                   `json:"userId" binding:"required"`
