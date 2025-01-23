@@ -93,31 +93,25 @@ func (order) List(c *gin.Context) {
 	}
 	orm = orm.Model(&model.Order{})
 	if id != "" {
-		orm = orm.Where("id =?", id)
+		orm = orm.Where("id like ?", "%"+id+"%")
 	}
 	if stationId != "" {
-		orm = orm.Where("station_id =?", stationId)
+		orm = orm.Where("station_id like ?", "%"+stationId+"%")
 	}
 	if status != "" {
-		orm = orm.Where("status =?", status)
+		orm = orm.Where("status like ?", "%"+status+"%")
 	}
 	if dispatcherId != "" {
-		orm = orm.Where("dispatcher_id =?", dispatcherId)
+		orm = orm.Where("dispatcher_id like ?", "%"+dispatcherId+"%")
 	}
 	if operatorId != "" {
-		orm = orm.Where("operator_id =?", operatorId)
+		orm = orm.Where("operator_id like ?", "%"+operatorId+"%")
 	}
 	if approverId != "" {
-		var ids []uint
-		db.Dao.Model(&model.OrderApproval{}).Where("approver_id =?", approverId).Pluck("order_id", &ids) // 获取工单id
-		orm = orm.Where("id IN ?", ids)
-		//orm = orm.Joins("JOIN order_approval ON order_reviewer.order_id = order_id").Where("order_approval.approver_id =?", approverId)
+		orm.Where("id in(?)", db.Dao.Model(&model.OrderApproval{}).Where("approver_id =?", approverId).Select("id"))
 	}
 	if reviewerId != "" {
-		var ids []uint
-		db.Dao.Model(&model.OrderStep{}).Where("reviewer_id =?", reviewerId).Pluck("order_id", &ids) // 获取工单id
-		orm = orm.Where("id IN ?", ids)
-		//orm = orm.Joins("JOIN order_step ON order_step.order_id = order_id").Where("order_step.reviewer_id =?", reviewerId)
+		orm.Where("id in(?)", db.Dao.Model(&model.OrderStep{}).Where("reviewer_id =?", reviewerId).Select("id"))
 	}
 	// 查询总数
 	orm.Count(&data.Total)

@@ -26,19 +26,19 @@ func (srvLog) List(c *gin.Context) {
 	var orm = db.Dao.Model(&model.SysLog{})
 	// 查询总数
 	if userId != "" {
-		orm.Where("user_id like ?", userId)
+		orm.Where("user_id like ?", "%"+userId+"%")
 	}
 	if userName != "" {
-		orm.Where("user_name like ?", userName)
+		orm.Where("user_name like ?", "%"+userName+"%")
 	}
 	if method != "" {
-		orm.Where("method like ?", method)
+		orm.Where("method like ?", "%"+method+"%")
 	}
 	if target != "" {
-		orm.Where("target like ?", target)
+		orm.Where("target like ?", "%"+target+"%")
 	}
 	if ip != "" {
-		orm.Where("ip like ?", ip)
+		orm.Where("ip like ?", "%"+ip+"%")
 	}
 	orm.Count(&data.Total)
 	// 分页查询

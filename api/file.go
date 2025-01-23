@@ -33,11 +33,13 @@ func (file) Upload(c *gin.Context) {
 		Resp.Succ(c, filename)
 	}
 }
+
 func (file) Download(c *gin.Context) {
 	var filename = c.Param("filename")
 	c.File("./uploads/" + filename)
 
 }
+
 func (file) Delete(c *gin.Context) {
 	var filename = c.Param("filename")
 	if err := os.Remove("./uploads/" + filename); err != nil {

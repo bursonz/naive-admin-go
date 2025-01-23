@@ -32,22 +32,22 @@ func (orderStep) List(c *gin.Context) {
 	}
 	orm = orm.Model(&model.OrderStep{})
 	if orderId != "" {
-		orm = orm.Where("order_id =?", orderId)
+		orm = orm.Where("order_id like ?", "%"+orderId+"%")
 	}
 	if task != "" {
-		orm = orm.Where("task =?", task)
+		orm = orm.Where("task like ?", "%"+task+"%")
 	}
 	if operatorId != "" {
-		orm = orm.Where("operator_id =?", operatorId)
+		orm = orm.Where("operator_id like ?", "%"+operatorId+"%")
 	}
 	if reviewerId != "" {
-		orm = orm.Where("reviewer_id =?", reviewerId)
+		orm = orm.Where("reviewer_id like ?", "%"+reviewerId+"%")
 	}
 	if status != "" {
-		orm = orm.Where("status =?", status)
+		orm = orm.Where("status = ?", status)
 	}
 	if lockId != "" {
-		orm = orm.Where("lock_id =?", lockId)
+		orm = orm.Where("lock_id like ?", "%"+lockId+"%")
 	}
 	// 查询总数
 	orm.Count(&data.Total)

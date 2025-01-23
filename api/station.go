@@ -27,13 +27,13 @@ func (station) List(c *gin.Context) {
 	// 条件查询
 	var orm = db.Dao.Model(&model.Station{})
 	if code != "" {
-		orm = orm.Where("code = ?", code)
+		orm = orm.Where("code like ?", "%"+code+"%")
 	}
 	if name != "" {
-		orm = orm.Where("name = ?", name)
+		orm = orm.Where("name like ?", "%"+name+"%")
 	}
 	if stationType != "" {
-		orm = orm.Where("station_type = ?", stationType)
+		orm = orm.Where("station_type like ?", "%"+stationType+"%")
 	}
 	// 查询总数
 	orm.Count(&data.Total)

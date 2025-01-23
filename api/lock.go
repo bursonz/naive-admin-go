@@ -108,10 +108,10 @@ func (lock) List(c *gin.Context) {
 	// 查询操作
 	orm := db.Dao.Model(&model.Lock{})
 	if stationId != "" {
-		orm = orm.Where("station_id=?", stationId)
+		orm = orm.Where("station_id like ?", "%"+stationId+"%")
 	}
 	if mac != "" {
-		orm = orm.Where("mac like ?", mac) // 模糊查询
+		orm = orm.Where("mac like ?", "%"+mac+"%") // 模糊查询
 	}
 	if enable != "" {
 		orm = orm.Where("enable = ?", enable)

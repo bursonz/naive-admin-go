@@ -29,10 +29,10 @@ func (orderApproval) List(c *gin.Context) {
 	}
 	orm = orm.Model(&model.OrderApproval{})
 	if orderId != "" {
-		orm.Where("order_id=?", orderId)
+		orm.Where("order_id like ?", "%"+orderId+"%")
 	}
 	if approverId != "" {
-		orm.Where("approver_id=?", approverId)
+		orm.Where("approver_id like ?", "%"+approverId+"%")
 	}
 	if status != "" {
 		orm.Where("status=?", status)
