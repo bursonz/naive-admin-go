@@ -185,9 +185,13 @@ func (user) Delete(c *gin.Context) {
 	Resp.Succ(c, "")
 }
 func (user) BatchDelete(c *gin.Context) {
-	ids := c.QueryArray("id")
+	var params inout.BatchDeleteReq
+	if err := c.BindJSON(&params); err != nil {
+		Resp.Err(c, 20001, err.Error())
+		return
+	}
 	if err := db.Dao.Transaction(func(tx *gorm.DB) error {
-		for _, uid := range ids {
+		for _, uid := range params.Ids {
 			tx.Where("id =?", uid).Delete(&model.User{})
 			tx.Where("userId =?", uid).Delete(&model.UserRolesRole{})
 			tx.Where("userId =?", uid).Delete(&model.Profile{})

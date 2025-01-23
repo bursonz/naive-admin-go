@@ -112,9 +112,13 @@ func (orderApproval) Delete(c *gin.Context) {
 	}
 }
 func (orderApproval) BatchDelete(c *gin.Context) {
-	ids := c.QueryArray("id")
+	var params inout.BatchDeleteReq
+	if err := c.BindJSON(&params); err != nil {
+		Resp.Err(c, 20001, err.Error())
+		return
+	}
 	if err := db.Dao.Transaction(func(tx *gorm.DB) error {
-		for _, id := range ids {
+		for _, id := range params.Ids {
 			tx.Where("id =?", id).Delete(&model.OrderApproval{})
 		}
 		return nil

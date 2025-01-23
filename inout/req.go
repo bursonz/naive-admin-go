@@ -188,3 +188,7 @@ type PatchOrderStepReq struct {
 	ImageUrl   *string `json:"imageUrl"`   // 图片url
 	Comment    *string `json:"comment"`    // 状态量
 }
+
+type BatchDeleteReq struct {
+	Ids []uint `json:"ids"`
+}
