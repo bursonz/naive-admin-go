@@ -69,3 +69,8 @@ type OrderStepListRes struct {
 	PageData []*model.OrderStep `json:"pageData"`
 	Total    int64              `json:"total"`
 }
+
+type LogListRes struct {
+	PageData []*model.SysLog `json:"pageData"`
+	Total    int64           `json:"total"`
+}

@@ -48,6 +48,7 @@ func AutoMigrate() error {
 		&model.Order{},
 		&model.OrderApproval{},
 		&model.OrderStep{},
+		&model.SysLog{},
 	); err != nil {
 		return err
 	}

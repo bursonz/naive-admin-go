@@ -21,6 +21,8 @@ func Init(r *gin.Engine) {
 	r.POST("/auth/password", api.Auth.Logout) //TODO 更换加密组件bcrypt
 	r.GET("/auth/refresh/:expire", api.Auth.RefreshToken)
 
+	r.Use(middleware.LogMiddleware()) // 日志中间件，记录资源访问日志
+
 	r.GET("/user", api.User.List)
 	r.POST("/user", api.User.Add)
 	r.DELETE("/user/:id", api.User.Delete)

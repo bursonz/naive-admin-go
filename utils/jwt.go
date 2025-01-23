@@ -17,8 +17,8 @@ var (
 
 // CustomClaims 载荷，可以加一些自己需要的信息
 type CustomClaims struct {
-	UID int // 用户id
-	//URole int // 用户角色
+	UID      int    // 用户id
+	UserName string // 用户名
 	jwt.RegisteredClaims
 }
 
@@ -41,14 +41,16 @@ func (j *JWT) createToken(claims CustomClaims) (string, error) {
 }
 
 // GenerateToken 生成令牌，有效期为1小时
-func GenerateToken(uId int) string {
+func GenerateToken(uid int, uname string) string {
 	j := NewJWT()
 	type cus struct {
-		UID int
+		UID      int
+		UserName string
 		jwt.RegisteredClaims
 	}
 	claims := cus{
-		uId,
+		uid,
+		uname,
 		jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
 		},
@@ -64,14 +66,16 @@ func GenerateToken(uId int) string {
 }
 
 // GenerateTokenWithExpire 生成令牌，有效期为expire小时
-func GenerateTokenWithExpire(uId int, expire int) string {
+func GenerateTokenWithExpire(uid int, uname string, expire int) string {
 	j := NewJWT()
 	type cus struct {
-		UID int
+		UID      int
+		UserName string
 		jwt.RegisteredClaims
 	}
 	claims := cus{
-		uId,
+		uid,
+		uname,
 		jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * time.Duration(expire))),
 		},

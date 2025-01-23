@@ -50,7 +50,7 @@ func (auth) Login(c *gin.Context) {
 		return
 	}
 	Resp.Succ(c, inout.LoginRes{
-		AccessToken: utils.GenerateToken(info.ID),
+		AccessToken: utils.GenerateToken(info.ID, info.Username),
 	})
 }
 
@@ -84,7 +84,8 @@ func (auth) RefreshToken(c *gin.Context) {
 		return
 	}
 	uid, _ := c.Get("uid")
+	uname, _ := c.Get("uname")
 	Resp.Succ(c, inout.LoginRes{
-		AccessToken: utils.GenerateTokenWithExpire(uid.(int), expire),
+		AccessToken: utils.GenerateTokenWithExpire(uid.(int), uname.(string), expire),
 	})
 }
