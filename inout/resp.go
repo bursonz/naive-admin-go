@@ -20,7 +20,7 @@ type UserDetailRes struct {
 type RoleListRes []*model.Role
 
 type UserListItem struct {
-	ID         int           `json:"id"`
+	ID         uint          `json:"id"`
 	Username   string        `json:"username"`
 	Enable     bool          `json:"enable"`
 	CreateTime time.Time     `json:"createTime"`
@@ -38,7 +38,7 @@ type UserListRes struct {
 }
 type RoleListPageItem struct {
 	model.Role
-	PermissionIds []int64 `json:"permissionIds" gorm:"-"`
+	PermissionIds []uint `json:"permissionIds" gorm:"-"`
 }
 type RoleListPageRes struct {
 	PageData []RoleListPageItem `json:"pageData"`

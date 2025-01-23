@@ -1,11 +1,11 @@
 package model
 
 type Permission struct {
-	ID          int          `json:"id"`
+	BaseModel
 	Name        string       `json:"name"`
 	Code        string       `json:"code"`
 	Type        string       `json:"type"`
-	ParentId    *int         `json:"parentId" gorm:"column:parentId"`
+	ParentId    *uint        `json:"parentId" gorm:"column:parentId"`
 	Path        string       `json:"path"`
 	Redirect    string       `json:"redirect"`
 	Icon        string       `json:"icon"`

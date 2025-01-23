@@ -21,7 +21,7 @@ func LogMiddleware() gin.HandlerFunc {
 		uname, _ := c.Get("uname")
 		newLog := &model.SysLog{
 			BaseModel: model.BaseModel{},
-			UserId:    uint(uid.(int)),
+			UserId:    uid.(uint),
 			UserName:  uname.(string),
 			Method:    c.Request.Method,    // 请求方法
 			Target:    c.FullPath(),        // 操作目标

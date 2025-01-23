@@ -46,7 +46,7 @@ func (permissions) ListPage(c *gin.Context) {
 
 	orm.Offset((pageNo - 1) * pageSize).Limit(pageSize).Find(&data.PageData)
 	for i, datum := range data.PageData {
-		var perIdList []int64
+		var perIdList []uint
 		db.Dao.Model(model.RolePermissionsPermission{}).Where("roleId=?", datum.ID).Select("permissionId").Find(&perIdList)
 		data.PageData[i].PermissionIds = perIdList
 	}

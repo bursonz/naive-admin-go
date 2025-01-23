@@ -10,14 +10,14 @@ type AuthPwReq struct {
 	OldPassword string `form:"oldPassword" binding:"required"`
 }
 type PatchUserReq struct {
-	Id       int     `json:"id"  binding:"required"`
+	Id       uint    `json:"id"  binding:"required"`
 	Enable   *bool   `json:"enable,omitempty"`
-	RoleIds  *[]int  `json:"roleIds,omitempty"`
+	RoleIds  *[]uint `json:"roleIds,omitempty"`
 	Password *string `json:"password,omitempty"`
 	Username *string `json:"username,omitempty"`
 }
 type PatchProfileUserReq struct {
-	Id       int     `json:"id"  binding:"required"`
+	Id       uint    `json:"id"  binding:"required"`
 	Gender   *int    `json:"gender"`
 	NickName *string `json:"nickName"`
 	Address  *string `json:"address"`
@@ -26,38 +26,38 @@ type PatchProfileUserReq struct {
 }
 type EnableRoleReq struct {
 	Enable bool `json:"enable" binding:"required"`
-	Id     int  `json:"id"`
+	Id     uint `json:"id"`
 }
 
 type AddUserReq struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
 	Enable   bool   `json:"enable" binding:"required"`
-	RoleIds  []int  `json:"roleIds" binding:"required"`
+	RoleIds  []uint `json:"roleIds" binding:"required"`
 }
 
 type AddRoleReq struct {
 	Code          string `json:"code" binding:"required"`
 	Enable        bool   `json:"enable"`
 	Name          string `json:"name" binding:"required"`
-	PermissionIds []int  `json:"permissionIds"`
+	PermissionIds []uint `json:"permissionIds"`
 }
 type PatchRoleReq struct {
-	Id            int     `json:"id"  binding:"required"`
+	Id            uint    `json:"id"  binding:"required"`
 	Code          *string `json:"code,omitempty"`
 	Enable        *bool   `json:"enable,omitempty"`
 	Name          *string `json:"name,omitempty"`
-	PermissionIds *[]int  `json:"permissionIds,omitempty"`
+	PermissionIds *[]uint `json:"permissionIds,omitempty"`
 }
 
 type PatchRoleOpeateUserReq struct {
-	Id      int   `json:"id" `
-	UserIds []int `json:"userIds"`
+	Id      uint   `json:"id" `
+	UserIds []uint `json:"userIds"`
 }
 
 type AddPermissionReq struct {
 	Type      string `json:"type" binding:"required"`
-	ParentId  *int   `json:"parentId"`
+	ParentId  *uint  `json:"parentId"`
 	Name      string `json:"name" binding:"required"`
 	Code      string `json:"code" binding:"required"`
 	Path      string `json:"path"`
@@ -71,9 +71,9 @@ type AddPermissionReq struct {
 }
 
 type PatchPermissionReq struct {
-	Id        int    `json:"id"  binding:"required"`
+	Id        uint   `json:"id"  binding:"required"`
 	Type      string `json:"type" binding:"required"`
-	ParentId  *int   `json:"parentId"`
+	ParentId  *uint  `json:"parentId"`
 	Name      string `json:"name" binding:"required"`
 	Code      string `json:"code" binding:"required"`
 	Path      string `json:"path"`
@@ -158,7 +158,7 @@ type AddOrderApprovalReq struct {
 	Comment    *string `json:"comment"`
 }
 type PatchOrderApprovalReq struct {
-	Id         int     `json:"id" binding:"required"`
+	Id         uint    `json:"id" binding:"required"`
 	ApproverId *int    `json:"approverId" binding:"required"`
 	Status     *int    `json:"status"`
 	Comment    *string `json:"comment"`
@@ -177,7 +177,7 @@ type AddOrderStepReq struct {
 	Comment    *string `json:"comment"`    // 状态量
 }
 type PatchOrderStepReq struct {
-	Id         int   `json:"id" binding:"required"`
+	Id         uint  `json:"id" binding:"required"`
 	Sort       *int  `json:"sort"`       // 步骤 1,2,3,...10
 	Task       *int  `json:"task"`       // 执行任务 1:开锁 2:关锁 3:上传图片 4:状态量
 	ReviewerId *uint `json:"reviewerId"` // 审核人id  TODO 要不要只保留一个userId，是否需要审核人，还是在工单中显示

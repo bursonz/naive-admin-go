@@ -86,6 +86,6 @@ func (auth) RefreshToken(c *gin.Context) {
 	uid, _ := c.Get("uid")
 	uname, _ := c.Get("uname")
 	Resp.Succ(c, inout.LoginRes{
-		AccessToken: utils.GenerateTokenWithExpire(uid.(int), uname.(string), expire),
+		AccessToken: utils.GenerateTokenWithExpire(uid.(uint), uname.(string), expire),
 	})
 }

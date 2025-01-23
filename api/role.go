@@ -73,7 +73,7 @@ func (role) ListPage(c *gin.Context) {
 
 	orm.Offset((pageNo - 1) * pageSize).Limit(pageSize).Find(&data.PageData)
 	for i, datum := range data.PageData {
-		var perIdList []int64
+		var perIdList []uint
 		db.Dao.Model(model.RolePermissionsPermission{}).Where("roleId=?", datum.ID).Select("permissionId").Find(&perIdList)
 		data.PageData[i].PermissionIds = perIdList
 	}
@@ -164,8 +164,8 @@ func (role) AddUser(c *gin.Context) {
 		Resp.Err(c, 20001, err.Error())
 		return
 	}
-	uid, _ := strconv.Atoi(c.Param("id"))
-	params.Id = uid
+	uid, _ := strconv.ParseUint(c.Param("id"), 10, 64)
+	params.Id = uint(uid)
 	db.Dao.Where("userId in (?) and roleId = ?", params.UserIds, params.Id).Delete(model.UserRolesRole{})
 	for _, id := range params.UserIds {
 		db.Dao.Model(model.UserRolesRole{}).Create(model.UserRolesRole{
@@ -182,8 +182,8 @@ func (role) RemoveUser(c *gin.Context) {
 		Resp.Err(c, 20001, err.Error())
 		return
 	}
-	uid, _ := strconv.Atoi(c.Param("id"))
-	params.Id = uid
+	uid, _ := strconv.ParseUint(c.Param("id"), 10, 64)
+	params.Id = uint(uid)
 	db.Dao.Where("userId in (?) and roleId = ?", params.UserIds, params.Id).Delete(model.UserRolesRole{})
 	Resp.Succ(c, "")
 }

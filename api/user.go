@@ -9,7 +9,6 @@ import (
 	"naive-admin-go/inout"
 	"naive-admin-go/model"
 	"strconv"
-	"time"
 )
 
 var User = &user{}
@@ -67,8 +66,8 @@ func (user) List(c *gin.Context) {
 			ID:         uinfo.ID,
 			Username:   uinfo.Username,
 			Enable:     uinfo.Enable,
-			CreateTime: uinfo.CreateTime,
-			UpdateTime: uinfo.UpdateTime,
+			CreateTime: uinfo.CreatedAt,
+			UpdateTime: uinfo.UpdatedAt,
 			Gender:     datum.Gender,
 			Avatar:     datum.Avatar,
 			Address:    datum.Address,
@@ -142,11 +141,9 @@ func (user) Add(c *gin.Context) {
 	}
 	err = db.Dao.Transaction(func(tx *gorm.DB) error {
 		var newUser = model.User{
-			Username:   params.Username,
-			Password:   fmt.Sprintf("%x", md5.Sum([]byte(params.Password))),
-			Enable:     params.Enable,
-			CreateTime: time.Now(),
-			UpdateTime: time.Now(),
+			Username: params.Username,
+			Password: fmt.Sprintf("%x", md5.Sum([]byte(params.Password))),
+			Enable:   params.Enable,
 		}
 		err = tx.Create(&newUser).Error
 		if err != nil {
