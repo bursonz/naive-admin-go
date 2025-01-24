@@ -3,7 +3,9 @@ package utils
 import (
 	"encoding/binary"
 	"encoding/hex"
+	"errors"
 	"fmt"
+	"naive-admin-go/model"
 	"time"
 )
 
@@ -54,32 +56,75 @@ func getTimestamp() []byte {
 	return []byte{year, month, day, hour, minute, second}
 }
 
-func GenerateCommand(cmd, roll byte, mac, key []byte) []byte {
+func GenerateCommand(cmd, roll byte, mac, key, newKey []byte) []byte {
 	var b []byte
 	switch cmd {
-	case 0xE0:
-		fallthrough
-	case 0x01:
+	case 0xE0, 0x01:
 		b = make([]byte, 17)
+		// 基本信息, 不加密
+		b[0] = cmd
+		b[1] = roll
+		b[2] = 0x00
+		b[3] = 0x0d
+		// 参数
+		copy(b[4:10], mac)
+		copy(b[10:16], getTimestamp()) // 时间戳
+	case 0x10:
+		b = make([]byte, 33)
+		// 基本信息, 不加密
+		b[0] = cmd
+		b[1] = roll
+		b[2] = 0x00
+		b[3] = 0x1d
+		// 参数
+		copy(b[4:10], mac)
+		copy(b[10:26], newKey)         // 新密钥
+		copy(b[26:32], getTimestamp()) // 时间戳
 	default:
 		return nil
 	}
-	// 基本信息, 不加密
-	b[0] = cmd
-	b[1] = roll
-	b[2] = 0x00
-	b[3] = byte(len(b) - 4)
-	copy(b[4:10], mac)
-	// 指令参数
-	copy(b[10:16], getTimestamp())
+	// 校验和
 	sum := byte(0x00)
-	for _, a := range b[:16] {
+	for _, a := range b[:len(b)-1] {
 		sum += a
 	}
-	b[16] = sum
+	b[len(b)-1] = sum
+	// 加密
 	if b[0] != 0x01 {
 		// 加密 b[4:]
 		b = append(b[:4], EncryptTEAFromBytes(b[4:], key)...)
 	}
 	return b
+}
+
+func ParseCommand(cmd []byte, lock *model.Lock) error {
+	if lock == nil {
+		return errors.New("无法找到锁，请核对Id")
+	}
+	switch cmd[0] {
+	case 0x01:
+		lock.HardwareVersion = hex.EncodeToString(cmd[10:11])
+		lock.SoftwareVersion = hex.EncodeToString(cmd[11:13])
+		lock.FactoryId = hex.EncodeToString(cmd[13:17])
+		lock.AlarmMode = hex.EncodeToString(cmd[17:18])
+		lock.LockStatus = hex.EncodeToString(cmd[18:19])
+		lock.BackupData = hex.EncodeToString(cmd[19:23])
+		lock.NewLock = cmd[23] == 0x55 //TODO 旧锁二次添加，目前不需要
+		lock.UnlockRecord = hex.EncodeToString(cmd[24:26])
+		lock.Power = hex.EncodeToString(cmd[26:27])
+		lock.Muted = hex.EncodeToString(cmd[27:28])
+		lock.Hibernate = hex.EncodeToString(cmd[28:29])
+	case 0xE0:
+		switch cmd[11] {
+		case 0x01:
+			// 开锁成功
+			lock.LockStatus = hex.EncodeToString([]byte{0x01})
+		case 0x05:
+			return errors.New("开锁失败,MAC地址错误")
+		}
+		break
+	default:
+		return errors.New("未知指令")
+	}
+	return nil
 }

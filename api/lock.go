@@ -8,6 +8,7 @@ import (
 	"naive-admin-go/inout"
 	"naive-admin-go/model"
 	"naive-admin-go/utils"
+	"os"
 	"strconv"
 )
 
@@ -24,22 +25,31 @@ func (lock) Add(c *gin.Context) {
 	}
 
 	var newLock = model.Lock{
-		StationId:   params.StationId,
-		AdminId:     params.AdminId,
-		SN:          params.SN,
-		Mac:         params.MAC,
-		FactoryId:   params.FactoryId,
-		CurrentKey:  params.CurrentKey,
-		FactoryKey:  params.FactoryKey,
-		Location:    params.Location,
-		Description: params.Description,
-		Enable:      params.Enable,
+		StationId:       params.StationId,
+		AdminId:         params.AdminId,
+		SN:              params.SN,
+		Mac:             params.MAC,
+		CurrentKey:      params.CurrentKey,
+		FactoryKey:      params.FactoryKey,
+		Location:        params.Location,
+		Description:     params.Description,
+		Enable:          params.Enable,
+		SoftwareVersion: params.SoftwareVersion,
+		HardwareVersion: params.HardwareVersion,
+		FactoryId:       params.FactoryId,
+		AlarmMode:       params.AlarmMode,
+		LockStatus:      params.LockStatus,
+		BackupData:      params.BackupData,
+		NewLock:         params.NewLock,
+		UnlockRecord:    params.UnlockRecord,
+		Power:           params.Power,
+		Muted:           params.Muted,
+		Hibernate:       params.Hibernate,
 	}
-
 	if err := db.Dao.Model(&model.Lock{}).Create(&newLock).Error; err != nil {
 		Resp.Err(c, 20001, err.Error())
 	} else {
-		Resp.Succ(c, "")
+		Resp.Succ(c, newLock.ID)
 	}
 
 }
@@ -63,6 +73,9 @@ func (lock) Update(c *gin.Context) {
 	if params.MAC != nil {
 		orm = orm.Update("mac", params.MAC)
 	}
+	if params.FactoryId != nil {
+		orm = orm.Update("factory_id", params.FactoryId)
+	}
 	if params.CurrentKey != nil {
 		orm = orm.Update("current_key", params.CurrentKey)
 	}
@@ -78,8 +91,29 @@ func (lock) Update(c *gin.Context) {
 	if params.Enable != nil {
 		orm = orm.Update("enable", params.Enable)
 	}
+	if params.SoftwareVersion != nil {
+		orm = orm.Update("software_version", params.SoftwareVersion)
+	}
+	if params.HardwareVersion != nil {
+		orm = orm.Update("hardware_version", params.HardwareVersion)
+	}
 	if params.AlarmMode != nil {
 		orm = orm.Update("alarm_mode", params.AlarmMode)
+	}
+	if params.LockStatus != nil {
+		orm = orm.Update("lock_status", params.LockStatus)
+	}
+	if params.BackupData != nil {
+		orm = orm.Update("backup_data", params.BackupData)
+	}
+	if params.NewLock != nil {
+		orm = orm.Update("new_lock", params.NewLock)
+	}
+	if params.UnlockRecord != nil {
+		orm = orm.Update("unlock_record", params.UnlockRecord)
+	}
+	if params.Power != nil {
+		orm = orm.Update("power", params.Power)
 	}
 	if params.Muted != nil {
 		orm = orm.Update("muted", params.Muted)
@@ -193,35 +227,9 @@ func (lock) Command(c *gin.Context) {
 	}
 	// 更新记录
 	if params.Cmd != nil {
-		// TODO 解析命令
-		cmd := *params.Cmd
-		switch cmd[0] {
-		case 0x01:
-			record.HardwareVersion = hex.EncodeToString(cmd[10:11])
-			record.SoftwareVersion = hex.EncodeToString(cmd[11:13])
-			record.FactoryId = hex.EncodeToString(cmd[13:17])
-			record.AlarmMode = hex.EncodeToString(cmd[17:18])
-			record.LockStatus = hex.EncodeToString(cmd[18:19])
-			record.BackupData = hex.EncodeToString(cmd[19:23])
-			record.NewLock = cmd[23] == 0x55 //TODO 旧锁二次添加，目前不需要
-			record.UnlockRecord = hex.EncodeToString(cmd[24:26])
-			record.Power = hex.EncodeToString(cmd[26:27])
-			record.Muted = hex.EncodeToString(cmd[27:28])
-			record.Hibernate = hex.EncodeToString(cmd[28:29])
-			break
-		case 0xE0:
-			switch cmd[11] {
-			case 0x01:
-				// 开锁成功
-				record.LockStatus = hex.EncodeToString([]byte{0x01})
-				break
-			case 0x05:
-				Resp.Err(c, 20001, "开锁失败,MAC地址错误")
-				return
-			}
-			break
-		default:
-			Resp.Err(c, 20001, "未支持的命令")
+		// TODO 作废
+		if err := utils.ParseCommand(*params.Cmd, &record); err != nil {
+			Resp.Err(c, 20001, err.Error())
 			return
 		}
 		// 更新数据库
@@ -230,10 +238,15 @@ func (lock) Command(c *gin.Context) {
 			return
 		}
 	}
-	// 生成命令
+
 	if params.Type != nil {
-		newCommand := utils.GenerateCommand(*params.Type, params.Roll, mac, key)
-		Resp.Succ(c, newCommand) // TODO 改为前端解析的格式
+		// 生成命令
+		newKey, _ := hex.DecodeString(os.Getenv("LOCK_KEY"))
+		newCommand := utils.GenerateCommand(*params.Type, params.Roll, mac, key, newKey)
+		Resp.Succ(c, inout.LockCommandRes{
+			Cmd: hex.EncodeToString(newCommand),
+			Key: hex.EncodeToString(newKey),
+		}) // TODO 改为前端解析的格式
 	} else {
 		Resp.Succ(c, "更新成功")
 	}

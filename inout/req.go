@@ -104,39 +104,57 @@ type PatchStationReq struct {
 }
 
 type AddLockReq struct {
-	StationId   uint   `json:"stationId" binding:"required"`
-	AdminId     uint   `json:"adminId" binding:"required"`
-	SN          string `json:"sn" binding:"required"`
-	MAC         string `json:"mac" binding:"required"`
-	FactoryId   string `json:"factoryId"`
-	CurrentKey  string `json:"currentKey"  binding:"required" comment:"当前密钥"`
-	FactoryKey  string `json:"factoryKey" binding:"required" comment:"出厂密钥"`
-	Location    string `json:"location"`
-	Description string `json:"description"`
-	Enable      bool   `json:"enable" comment:"1: 启用 0: 禁用"`
+	StationId       uint   `json:"stationId" binding:"required"`
+	AdminId         uint   `json:"adminId" binding:"required"`
+	SN              string `json:"sn" binding:"required"`
+	MAC             string `json:"mac" binding:"required"`
+	FactoryId       string `json:"factoryId"`
+	CurrentKey      string `json:"currentKey"  binding:"required" comment:"当前密钥"`
+	FactoryKey      string `json:"factoryKey" binding:"required" comment:"出厂密钥"`
+	Location        string `json:"location"`
+	Description     string `json:"description"`
+	Enable          bool   `json:"enable" comment:"1: 启用 0: 禁用"`
+	SoftwareVersion string `json:"softwareVersion"`
+	HardwareVersion string `json:"hardwareVersion"`
+	AlarmMode       string `json:"alarmMode"`
+	LockStatus      string `json:"lockStatus"`
+	BackupData      string `json:"backupDate" `
+	NewLock         bool   `json:"newLock" `
+	UnlockRecord    string `json:"unlockRecord" `
+	Power           string `json:"power" `
+	Muted           string `json:"muted"`
+	Hibernate       string `json:"hibernate"`
 }
 type PatchLockReq struct {
-	Id          uint    `json:"id" binding:"required"`
-	StationId   *uint   `json:"stationId"`
-	AdminId     *uint   `json:"adminId"`
-	SN          *string `json:"sn"`
-	MAC         *string `json:"mac"`
-	FactoryId   *string `json:"factoryId"`
-	CurrentKey  *string `json:"currentKey"`
-	FactoryKey  *string `json:"factoryKey"`
-	Location    *string `json:"location"`
-	Description *string `json:"description"`
-	Enable      *bool   `json:"enable"`
-	AlarmMode   *string `json:"alarmMode" comment:"0x00:不报警，0x01:迟钝模式，0x02:中等模式，0x03:敏感模式"`
-	Muted       *string `json:"muted" comment:"0x00静音模式关闭，0x01静音模式打开，其他错误"`
-	Hibernate   *string `json:"hibernate" comment:"0x00:正常休眠，0x01:Blue常开，0x02:省电模式"`
+	Id              uint    `json:"id" binding:"required"`
+	StationId       *uint   `json:"stationId,omitempty"`
+	AdminId         *uint   `json:"adminId,omitempty"`
+	SN              *string `json:"sn,omitempty"`
+	MAC             *string `json:"mac,omitempty"`
+	FactoryId       *string `json:"factoryId,omitempty"`
+	CurrentKey      *string `json:"currentKey,omitempty"`
+	FactoryKey      *string `json:"factoryKey,omitempty"`
+	Location        *string `json:"location"`
+	Description     *string `json:"description"`
+	Enable          *bool   `json:"enable" comment:"1: 启用 0: 禁用"`
+	SoftwareVersion *string `json:"softwareVersion,omitempty"`
+	HardwareVersion *string `json:"hardwareVersion,omitempty"`
+	AlarmMode       *string `json:"alarmMode,omitempty" comment:"0x00:不报警，0x01:迟钝模式，0x02:中等模式，0x03:敏感模式"`
+	LockStatus      *string `json:"lockStatus" `
+	BackupData      *string `json:"backupDate,omitempty" `
+	NewLock         *bool   `json:"newLock"`
+	UnlockRecord    *string `json:"unlockRecord,omitempty"`
+	Power           *string `json:"power"`
+	Muted           *string `json:"muted" comment:"0x00静音模式关闭，0x01静音模式打开，其他错误"`
+	Hibernate       *string `json:"hibernate" comment:"0x00:正常休眠，0x01:Blue常开，0x02:省电模式"`
 }
 
 type LockCommandReq struct {
 	Id   uint    `json:"id" binding:"required"`
 	Roll byte    `json:"roll" binding:"required"`
-	Type *byte   `json:"type"`
-	Cmd  *[]byte `json:"cmd"`
+	Type *byte   `json:"type,omitempty"`
+	Cmd  *[]byte `json:"cmd,omitempty"`
+	Key  *[]byte `json:"key,omitempty"` // newkey 需要变更的加密密钥
 }
 
 type AddOrderReq struct {

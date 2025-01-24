@@ -3,13 +3,13 @@ package model
 type Lock struct {
 	BaseModel
 	// 填写信息
-	StationId   uint   `json:"stationId" gorm:"type:bigint unsigned;notNull;comment:站点id"`
+	StationId   uint   `json:"stationId" gorm:"type:bigint unsigned;notNull;index;comment:站点id"`
 	AdminId     uint   `json:"adminId" gorm:"type:bigint unsigned;notNull;comment:管理员id"`
 	Location    string `json:"location" gorm:"type:varchar(255)"`
 	Description string `json:"description" gorm:"type:varchar(255)"`
 	// 设备信息
-	SN         string `json:"sn" gorm:"type:varchar(8)"`
-	Mac        string `json:"mac" gorm:"type:varchar(12)"`
+	SN         string `json:"sn" gorm:"type:varchar(8);unique_index"`
+	Mac        string `json:"mac" gorm:"type:varchar(12);unique_index"`
 	CurrentKey string `json:"currentKey" gorm:"type:varchar(32)" comment:"当前密钥"`
 	FactoryKey string `json:"factoryKey" gorm:"type:varchar(32)" comment:"出厂密钥"`
 	// 设备状态

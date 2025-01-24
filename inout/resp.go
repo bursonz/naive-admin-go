@@ -74,3 +74,8 @@ type LogListRes struct {
 	PageData []*model.SysLog `json:"pageData"`
 	Total    int64           `json:"total"`
 }
+
+type LockCommandRes struct {
+	Cmd string `json:"cmd"`
+	Key string `json:"key"` // 返回的key，在请求10变更密钥命令时返回
+}
