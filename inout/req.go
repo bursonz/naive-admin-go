@@ -166,7 +166,11 @@ type AddOrderReq struct {
 	OrderSteps     []*AddOrderStepReq     `json:"orderSteps"`
 }
 type PatchOrderReq struct {
-	Id int `json:"id" binding:"required"`
+	Id           int   `json:"id" binding:"required"`
+	DispatcherId *uint `json:"dispatcherId"` // 派单人id
+	OperatorId   *uint `json:"operatorId"`   // 操作员id
+	StationId    *uint `json:"stationId"`    // 站点id
+	Status       *int  `json:"status"`       // 工单状态
 }
 type AddOrderApprovalReq struct {
 	OrderId    uint    `json:"orderId" binding:"required"`
@@ -177,7 +181,7 @@ type AddOrderApprovalReq struct {
 }
 type PatchOrderApprovalReq struct {
 	Id         uint    `json:"id" binding:"required"`
-	ApproverId *int    `json:"approverId" binding:"required"`
+	ApproverId *uint   `json:"approverId" binding:"required"`
 	Status     *int    `json:"status"`
 	Comment    *string `json:"comment"`
 }

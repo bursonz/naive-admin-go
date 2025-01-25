@@ -79,24 +79,53 @@ func (orderApproval) Add(c *gin.Context) {
 // Update 更新工单审批, 只能更新状态和审批人
 func (orderApproval) Update(c *gin.Context) {
 	var params inout.PatchOrderApprovalReq
-	err := c.BindJSON(&params)
-	if err != nil {
+	if err := c.BindJSON(&params); err != nil {
 		Resp.Err(c, 20001, err.Error())
 		return
 	}
-	orm := db.Dao.Model(&model.OrderApproval{}).Where("id=?", params.Id)
-	if params.Status != nil {
-		orm.Update("status", params.Status)
+	if err := db.Dao.Transaction(func(tx *gorm.DB) error {
+		var err error
+		orm := tx.Model(&model.OrderApproval{}).Where("id=?", params.Id)
+		if params.ApproverId != nil {
+			err = orm.Update("approver_id", params.ApproverId).Error
+			if err != nil {
+				return err
+			}
+		}
+		if params.Comment != nil {
+			err = orm.Update("comment", params.Comment).Error
+			if err != nil {
+				return err
+			}
+		}
+		if params.Status != nil {
+			err = orm.Update("status", params.Status).Error
+			if err != nil {
+				return err
+			}
+			// 更新工单状态
+			var current model.OrderApproval
+			orm.Select("order_id, status,sort").Find(&current)
+			switch *params.Status {
+			case OrderApprovalStatusApproved:
+				var total int64
+				tx.Model(&model.OrderApproval{}).
+					Where("order_id=?", current.OrderId).
+					Where("status=?", OrderApprovalStatusApproved).
+					Count(&total)
+				if total == int64(current.Sort) {
+					tx.Model(&model.Order{}).Where("id=?", current.OrderId).Update("status", OrderExecuting)
+				}
+			case OrderApprovalStatusRejected:
+				tx.Model(&model.Order{}).Where("id=?", current.OrderId).Update("status", OrderRejected)
+			}
+		}
+		return err
+	}); err != nil {
+		Resp.Err(c, 20001, err.Error())
+	} else {
+		Resp.Succ(c, nil)
 	}
-	if params.ApproverId != nil {
-		orm.Update("approver_id", params.ApproverId)
-	}
-	if params.Comment != nil {
-		orm.Update("comment", params.Comment)
-	}
-	// TODO 检查工单审批状态，是否可以更新工单，进入执行状态
-	// 待审批->已审批||已驳回
-	Resp.Succ(c, err)
 }
 
 func (orderApproval) Delete(c *gin.Context) {

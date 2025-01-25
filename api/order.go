@@ -24,7 +24,7 @@ func (order) Add(c *gin.Context) {
 		var newOrder = model.Order{
 			DispatcherId: params.DispatcherId,
 			StationId:    params.StationId,
-			Status:       params.Status,
+			Status:       OrderApproving,
 		}
 		if err := tx.Create(&newOrder).Error; err != nil {
 			return err
@@ -34,9 +34,9 @@ func (order) Add(c *gin.Context) {
 			newApproval := model.OrderApproval{
 				OrderId:    newOrder.ID,
 				ApproverId: approval.ApproverId,
-				Status:     1,
+				Status:     OrderApprovalStatusApproving,
 				Comment:    approval.Comment,
-				Sort:       i + 1, // TODO 或换成approval.Sort
+				Sort:       i + 1,
 			}
 			if err := tx.Create(&newApproval).Error; err != nil {
 				return err
@@ -49,7 +49,7 @@ func (order) Add(c *gin.Context) {
 				Task:       step.Task,
 				Sort:       i + 1,
 				ReviewerId: step.ReviewerId,
-				Status:     4,
+				Status:     OrderStepStatusExecuting,
 				LockId:     step.LockId,
 				LockStatus: step.LockStatus,
 				ImageUrl:   step.ImageUrl,
@@ -71,7 +71,29 @@ func (order) Add(c *gin.Context) {
 
 // Update 更新工单,只更新工单信息部分，不更新工单审批和工单步骤，工单审批和工单步骤的更新需要单独的接口
 func (order) Update(c *gin.Context) {
-	Resp.Err(c, 20001, "工单创建后不可修改")
+	var params inout.PatchOrderReq
+	if err := c.BindJSON(&params); err != nil {
+		Resp.Err(c, 20001, err.Error())
+		return
+	}
+	orm := db.Dao.Model(&model.Order{}).Where("id =?", params.Id)
+	if params.DispatcherId != nil {
+		orm = orm.Update("dispatcher_id", params.DispatcherId)
+	}
+	if params.OperatorId != nil {
+		orm = orm.Update("operator_id", params.OperatorId)
+	}
+	if params.StationId != nil {
+		orm = orm.Update("station_id", params.StationId)
+	}
+	if params.Status != nil {
+		orm = orm.Update("status", params.Status)
+	}
+	if err := orm.Error; err != nil {
+		Resp.Err(c, 20001, err.Error())
+	} else {
+		Resp.Succ(c, "更新工单成功")
+	}
 }
 func (order) List(c *gin.Context) {
 	var data inout.OrderListRes

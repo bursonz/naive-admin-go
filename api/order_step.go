@@ -92,44 +92,99 @@ func (orderStep) Add(c *gin.Context) {
 
 func (orderStep) Update(c *gin.Context) {
 	var params inout.PatchOrderStepReq
-	err := c.BindJSON(&params)
-	if err != nil {
+	if err := c.BindJSON(&params); err != nil {
 		Resp.Err(c, 20001, err.Error())
 		return
 	}
-	orm := db.Dao.Model(&model.OrderStep{}).Where("id = ?", params.Id)
-	if params.Task != nil {
-		orm.Update("task", params.Task)
+	if err := db.Dao.Transaction(func(tx *gorm.DB) error {
+		var err error
+		orm := tx.Model(&model.OrderStep{}).Where("id = ?", params.Id)
+		if params.Task != nil {
+			err = orm.Update("task", params.Task).Error
+			if err != nil {
+				return err
+			}
+		}
+		if params.Sort != nil {
+			err = orm.Update("sort", params.Sort).Error
+			if err != nil {
+				return err
+			}
+		}
+		if params.ImageUrl != nil {
+			err = orm.Update("image_url", params.ImageUrl).Error
+			if err != nil {
+				return err
+			}
+		}
+		if params.Comment != nil {
+			err = orm.Update("comment", params.Comment).Error
+			if err != nil {
+				return err
+			}
+		}
+		if params.LockId != nil {
+			err = orm.Update("lock_id", params.LockId).Error
+			if err != nil {
+				return err
+			}
+		}
+		if params.LockStatus != nil {
+			err = orm.Update("lock_status", params.LockStatus).Error
+			if err != nil {
+				return err
+			}
+		}
+		if params.ReviewerId != nil {
+			err = orm.Update("reviewer_id", params.ReviewerId).Error
+			if err != nil {
+				return err
+			}
+		}
+		if params.Status != nil {
+			err = orm.Update("status", params.Status).Error
+			if err != nil {
+				return err
+			}
+			// 获取当前步骤信息
+			var current model.OrderStep
+			orm.Select("order_id, task, status").Find(&current)
+			var expectStatus, targetStatus int
+			// 计算期望的状态和目标状态
+			switch current.Task {
+			case OrderStepTaskUnlock: // 执行
+				expectStatus = OrderStepStatusExecuted
+				targetStatus = OrderReviewing
+			case OrderStepTaskUploadConfirmImage, OrderStepTaskRetrieveStatusValue: // 审核
+				expectStatus = OrderStepStatusReviewed
+				targetStatus = OrderConfirming
+			case OrderStepTaskLock: // 确认
+				expectStatus = OrderStepStatusConfirmed
+				targetStatus = OrderFinished
+			}
+			// 如果当前步骤的状态等于期望的状态，且符合要求，则更新工单状态为目标状态
+			if current.Status == expectStatus {
+				var taskTotal, currentTotal int64
+				t := tx.Model(&model.OrderStep{}).Where("order_id =?", current.OrderId)
+				// 统计当前任务类型的所有步骤的数量
+				t.Where("task =?", current.Task).Count(&taskTotal)
+				// 统计当前任务类型的已完成步骤的数量
+				t.Where("status =?", expectStatus).Count(&currentTotal)
+				// 如果已完成步骤的数量等于总步骤数量，更新工单状态为审核中
+				if currentTotal == taskTotal {
+					err = tx.Model(&model.Order{}).Where("id =?", current.OrderId).Update("status", targetStatus).Error
+					if err != nil {
+						return err
+					}
+				}
+			}
+		}
+		return nil
+	}); err != nil {
+		Resp.Err(c, 20001, err.Error())
+	} else {
+		Resp.Succ(c, err)
 	}
-	if params.Sort != nil {
-		orm.Update("sort", params.Sort)
-	}
-	if params.ImageUrl != nil {
-		orm.Update("image_url", params.ImageUrl)
-	}
-	if params.Comment != nil {
-		orm.Update("comment", params.Comment)
-	}
-	if params.LockId != nil {
-		orm.Update("lock_id", params.LockId)
-	}
-	if params.LockStatus != nil {
-		orm.Update("lock_status", params.LockStatus)
-	}
-	if params.ReviewerId != nil {
-		orm.Update("reviewer_id", params.ReviewerId)
-	}
-	if params.Status != nil {
-		orm.Update("status", params.Status)
-	}
-	// TODO 检查工单步骤状态，是否可以更新工单，完成工单
-	// 待执行||重新执行->待审核
-	// 待审核->已审核||重新执行
-	// 已审核->待关锁->已完成
-	if params.Status != nil {
-		orm.Update("status", params.Status)
-	}
-	Resp.Succ(c, err)
 
 }
 func (orderStep) Delete(c *gin.Context) {
