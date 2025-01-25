@@ -19,7 +19,7 @@ func Init(r *gin.Engine) {
 	r.Use(middleware.Jwt())
 	r.POST("/auth/logout", api.Auth.Logout)
 	r.POST("/auth/password", api.Auth.Logout) //TODO 更换加密组件bcrypt
-	r.GET("/auth/refresh/:expire", api.Auth.RefreshToken)
+	r.GET("/auth/refresh", api.Auth.RefreshToken)
 
 	r.Use(middleware.LogMiddleware()) // 日志中间件，记录资源访问日志
 

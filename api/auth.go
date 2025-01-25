@@ -10,6 +10,7 @@ import (
 	"naive-admin-go/model"
 	"naive-admin-go/utils"
 	"net/http"
+	"strconv"
 )
 
 var Auth = &auth{}
@@ -77,8 +78,7 @@ func (auth) Logout(c *gin.Context) {
 }
 
 func (auth) RefreshToken(c *gin.Context) {
-	var expire int
-	err := c.Bind(&expire)
+	expire, err := strconv.Atoi(c.DefaultQuery("expire", "1"))
 	if err != nil {
 		Resp.Err(c, 20001, err.Error())
 		return
