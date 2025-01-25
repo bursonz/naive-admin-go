@@ -106,20 +106,21 @@ type PatchStationReq struct {
 type AddLockReq struct {
 	StationId       uint   `json:"stationId" binding:"required"`
 	AdminId         uint   `json:"adminId" binding:"required"`
+	Name            string `json:"name" comment:"锁名称"`
+	Location        string `json:"location"`
+	Description     string `json:"description"`
 	SN              string `json:"sn" binding:"required"`
 	MAC             string `json:"mac" binding:"required"`
 	FactoryId       string `json:"factoryId"`
 	CurrentKey      string `json:"currentKey"  binding:"required" comment:"当前密钥"`
 	FactoryKey      string `json:"factoryKey" binding:"required" comment:"出厂密钥"`
-	Location        string `json:"location"`
-	Description     string `json:"description"`
 	Enable          bool   `json:"enable" comment:"1: 启用 0: 禁用"`
 	SoftwareVersion string `json:"softwareVersion"`
 	HardwareVersion string `json:"hardwareVersion"`
 	AlarmMode       string `json:"alarmMode"`
 	LockStatus      string `json:"lockStatus"`
 	BackupData      string `json:"backupDate" `
-	NewLock         bool   `json:"newLock" `
+	NewLock         string `json:"newLock" `
 	UnlockRecord    string `json:"unlockRecord" `
 	Power           string `json:"power" `
 	Muted           string `json:"muted"`
@@ -129,20 +130,21 @@ type PatchLockReq struct {
 	Id              uint    `json:"id" binding:"required"`
 	StationId       *uint   `json:"stationId,omitempty"`
 	AdminId         *uint   `json:"adminId,omitempty"`
+	Location        *string `json:"location"`
+	Description     *string `json:"description"`
+	Name            *string `json:"name"`
 	SN              *string `json:"sn,omitempty"`
 	MAC             *string `json:"mac,omitempty"`
 	FactoryId       *string `json:"factoryId,omitempty"`
 	CurrentKey      *string `json:"currentKey,omitempty"`
 	FactoryKey      *string `json:"factoryKey,omitempty"`
-	Location        *string `json:"location"`
-	Description     *string `json:"description"`
 	Enable          *bool   `json:"enable" comment:"1: 启用 0: 禁用"`
 	SoftwareVersion *string `json:"softwareVersion,omitempty"`
 	HardwareVersion *string `json:"hardwareVersion,omitempty"`
 	AlarmMode       *string `json:"alarmMode,omitempty" comment:"0x00:不报警，0x01:迟钝模式，0x02:中等模式，0x03:敏感模式"`
 	LockStatus      *string `json:"lockStatus" `
 	BackupData      *string `json:"backupDate,omitempty" `
-	NewLock         *bool   `json:"newLock"`
+	NewLock         *string `json:"newLock"`
 	UnlockRecord    *string `json:"unlockRecord,omitempty"`
 	Power           *string `json:"power"`
 	Muted           *string `json:"muted" comment:"0x00静音模式关闭，0x01静音模式打开，其他错误"`

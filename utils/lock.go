@@ -109,7 +109,7 @@ func ParseCommand(cmd []byte, lock *model.Lock) error {
 		lock.AlarmMode = hex.EncodeToString(cmd[17:18])
 		lock.LockStatus = hex.EncodeToString(cmd[18:19])
 		lock.BackupData = hex.EncodeToString(cmd[19:23])
-		lock.NewLock = cmd[23] == 0x55 //TODO 旧锁二次添加，目前不需要
+		lock.NewLock = hex.EncodeToString(cmd[23:24]) //TODO 旧锁二次添加，目前不需要
 		lock.UnlockRecord = hex.EncodeToString(cmd[24:26])
 		lock.Power = hex.EncodeToString(cmd[26:27])
 		lock.Muted = hex.EncodeToString(cmd[27:28])

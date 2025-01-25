@@ -29,6 +29,7 @@ func (lock) Add(c *gin.Context) {
 		AdminId:         params.AdminId,
 		SN:              params.SN,
 		Mac:             params.MAC,
+		Name:            params.Name,
 		CurrentKey:      params.CurrentKey,
 		FactoryKey:      params.FactoryKey,
 		Location:        params.Location,
@@ -66,6 +67,9 @@ func (lock) Update(c *gin.Context) {
 	}
 	if params.AdminId != nil {
 		orm = orm.Update("admin_id", params.AdminId)
+	}
+	if params.Name != nil {
+		orm = orm.Update("name", params.Name)
 	}
 	if params.SN != nil {
 		orm = orm.Update("sn", params.SN)

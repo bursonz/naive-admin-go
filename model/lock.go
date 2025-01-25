@@ -7,6 +7,7 @@ type Lock struct {
 	AdminId     uint   `json:"adminId" gorm:"type:bigint unsigned;notNull;comment:管理员id"`
 	Location    string `json:"location" gorm:"type:varchar(255)"`
 	Description string `json:"description" gorm:"type:varchar(255)"`
+	Name        string `json:"name" gorm:"type:varchar(32);notNull;unique;index;comment:锁名称"`
 	// 设备信息
 	SN         string `json:"sn" gorm:"type:varchar(8);unique_index"`
 	Mac        string `json:"mac" gorm:"type:varchar(12);unique_index"`
@@ -26,6 +27,7 @@ type Lock struct {
 	Power           string `json:"power" gorm:"type:varchar(2)"`
 	Muted           string `json:"muted" gorm:"type:varchar(2)"`
 	Hibernate       string `json:"hibernate" gorm:"type:varchar(2)"`
+	NewLock         string `json:"newLock" gorm:"type:varchar(2);default:null;comment:新锁标识"`
 }
 
 func (Lock) TableName() string { return "lock" }
