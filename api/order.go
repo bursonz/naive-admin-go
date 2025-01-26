@@ -108,6 +108,7 @@ func (order) List(c *gin.Context) {
 	var pageNo, _ = strconv.Atoi(c.DefaultQuery("pageNo", "1"))
 	var pageSize, _ = strconv.Atoi(c.DefaultQuery("pageSize", "10"))
 	var deleted = c.DefaultQuery("deleted", "")
+	var all = c.DefaultQuery("all", "")
 	// 条件查询
 	var orm = db.Dao
 	if deleted != "" {
@@ -142,6 +143,20 @@ func (order) List(c *gin.Context) {
 		orm.Find(&data.PageData)
 	} else {
 		orm.Offset((pageNo - 1) * pageSize).Limit(pageSize).Find(&data.PageData)
+	}
+	if all != "" {
+		// 遍历所有的工单，查询工单审批和工单步骤
+		for i, o := range data.PageData {
+			// 查询工单审批
+			var approvals []model.OrderApproval
+			db.Dao.Model(&model.OrderApproval{}).Where("order_id =?", o.ID).Find(&approvals)
+			// 查询工单步骤
+			var steps []model.OrderStep
+			db.Dao.Model(&model.OrderStep{}).Where("order_id =?", o.ID).Find(&steps)
+			// 将工单审批和工单步骤赋值给工单
+			data.PageData[i].OrderApprovals = approvals
+			data.PageData[i].OrderSteps = steps
+		}
 	}
 	Resp.Succ(c, data)
 }
