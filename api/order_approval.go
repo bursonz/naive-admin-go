@@ -59,6 +59,7 @@ func (orderApproval) Add(c *gin.Context) {
 			ApproverId: params.ApproverId,
 			Status:     params.Status,
 			Sort:       params.Sort,
+			Comment:    params.Comment,
 		}
 		if err := tx.Create(&newOrderApproval).Error; err != nil {
 			return err

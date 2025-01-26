@@ -25,6 +25,7 @@ func (order) Add(c *gin.Context) {
 			DispatcherId: params.DispatcherId,
 			StationId:    params.StationId,
 			Status:       OrderApproving,
+			OperatorId:   params.OperatorId,
 		}
 		if err := tx.Create(&newOrder).Error; err != nil {
 			return err
