@@ -64,3 +64,11 @@ const (
 	OrderStepTaskUploadConfirmImage  = 3 // 上传确认图片
 	OrderStepTaskRetrieveStatusValue = 4 // 获取状态量
 )
+
+// 锁状态
+type LockStatus int
+
+const (
+	LockStatusLocked = 0 // 锁关
+	LockStatusUnLock = 1 // 锁开
+)

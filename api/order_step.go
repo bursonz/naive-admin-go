@@ -129,16 +129,32 @@ func (orderStep) Update(c *gin.Context) {
 				return err
 			}
 		}
+		if params.ReviewerId != nil {
+			err = orm.Update("reviewer_id", params.ReviewerId).Error
+			if err != nil {
+				return err
+			}
+		}
 		if params.LockStatus != nil {
 			err = orm.Update("lock_status", params.LockStatus).Error
 			if err != nil {
 				return err
 			}
-		}
-		if params.ReviewerId != nil {
-			err = orm.Update("reviewer_id", params.ReviewerId).Error
-			if err != nil {
-				return err
+			// 如果锁状态都为关，则更新工单步骤状态为已完成
+			if *params.LockStatus == LockStatusLocked {
+				var countUnlock int64
+				tx.Model(&model.OrderStep{}).Where("task =?", OrderStepTaskUnlock).Where("lock_status =?", LockStatusUnLock).Count(&countUnlock) // 查询所有未关锁的步骤数量
+				if countUnlock == 0 {                                                                                                            // 没有，即锁全部关闭
+					var countOrder int64
+					tx.Model(&model.Order{}).Where("id =?", params.OrderId).Where("status = ?", OrderConfirming).Count(&countOrder) // 查询当前工单状态是否为确认中
+					if countOrder != 0 {                                                                                            // 如果是，则更新工单步骤状态为已完成
+						// 更新工单步骤状态为已完成
+						err = orm.Update("status", OrderStepStatusReviewed).Error
+						if err != nil {
+							return err
+						}
+					}
+				}
 			}
 		}
 		if params.Status != nil {
