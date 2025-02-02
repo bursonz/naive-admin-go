@@ -42,13 +42,18 @@ func Init() {
 
 func AutoMigrate() error {
 	if err := Dao.AutoMigrate(
+		&model.Permission{},
 		&model.Profile{},
+		&model.Role{},
+		&model.RolePermissionsPermission{},
+		&model.User{},
+		&model.UserRolesRole{},
+		&model.SysLog{},
 		&model.Station{},
 		&model.Lock{},
 		&model.Order{},
 		&model.OrderApproval{},
 		&model.OrderStep{},
-		&model.SysLog{},
 	); err != nil {
 		return err
 	}

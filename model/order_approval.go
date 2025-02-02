@@ -2,12 +2,23 @@ package model
 
 type OrderApproval struct {
 	BaseModel
-	//工单审批信息
-	OrderId    uint    `json:"orderId"`    // 工单id
-	ApproverId uint    `json:"approverId"` // 审批人id
-	Status     int     `json:"status"`     // 审批状态 -1:拒绝 0:待审批 1:已审批
-	Comment    *string `json:"comment"`    // 审批意见
-	Sort       int     `json:"sort"`       // 审批顺序 1,2,3,...10
+	// 工单ID
+	OrderId    uint    `json:"orderId" gorm:"type:bigint unsigned;not null;index;comment:工单ID"`
+	
+	// 审批人ID
+	ApproverId uint    `json:"approverId" gorm:"type:bigint unsigned;not null;index;comment:审批人ID"`
+	
+	// 审批状态
+	// -1: 拒绝
+	//  0: 待审批
+	//  1: 已审批
+	Status     int     `json:"status" gorm:"type:tinyint;not null;default:0;index;comment:审批状态"`
+	
+	// 审批意见
+	Comment    *string `json:"comment" gorm:"type:varchar(255);comment:审批意见"`
+	
+	// 审批顺序
+	Sort       int     `json:"sort" gorm:"type:tinyint;not null;comment:审批顺序"`
 }
 
 func (OrderApproval) TableName() string {

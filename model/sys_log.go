@@ -1,5 +1,6 @@
 package model
 
+// TODO 补全gorm tag
 type SysLog struct {
 	BaseModel
 	UserId   uint   `json:"userId"`   // 用户id
