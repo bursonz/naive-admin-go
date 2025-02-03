@@ -109,12 +109,11 @@ func (orderApproval) Update(c *gin.Context) {
 			orm.Select("order_id, status,sort").Find(&current)
 			switch *params.Status {
 			case OrderApprovalStatusApproved:
-				var total int64
+				var approvedTotal, total int64
 				tx.Model(&model.OrderApproval{}).
-					Where("order_id=?", current.OrderId).
-					Where("status=?", OrderApprovalStatusApproved).
-					Count(&total)
-				if total == int64(current.Sort) {
+					Where("order_id=?", current.OrderId).Count(&total).
+					Where("status=?", OrderApprovalStatusApproved).Count(&approvedTotal)
+				if total == approvedTotal {
 					tx.Model(&model.Order{}).Where("id=?", current.OrderId).Update("status", OrderExecuting)
 				}
 			case OrderApprovalStatusRejected:
