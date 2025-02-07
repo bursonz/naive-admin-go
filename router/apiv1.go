@@ -81,4 +81,5 @@ func Init(r *gin.Engine) {
 
 	r.GET("/f/:filename", api.File.Download)
 	r.POST("/f/:filename", api.File.Upload)
+	r.DELETE("/f/:filename", api.File.Delete)
 }

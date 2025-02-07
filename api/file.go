@@ -21,12 +21,12 @@ func (file) Upload(c *gin.Context) {
 	}
 	dst := "./uploads/"
 	// 检查并创建文件夹
-	if err := os.MkdirAll(dst, os.ModePerm); err != nil {
+	if err = os.MkdirAll(dst, os.ModePerm); err != nil {
 		Resp.Err(c, 20001, err.Error())
 		return
 	}
 	// 保存文件到本地
-	if err := c.SaveUploadedFile(f, dst+filename); err != nil {
+	if err = c.SaveUploadedFile(f, dst+filename); err != nil {
 		Resp.Err(c, 20001, err.Error())
 		return
 	} else {
@@ -44,6 +44,7 @@ func (file) Delete(c *gin.Context) {
 	var filename = c.Param("filename")
 	if err := os.Remove("./uploads/" + filename); err != nil {
 		Resp.Err(c, 20001, err.Error())
+	} else {
+		Resp.Succ(c, "删除成功")
 	}
-	Resp.Succ(c, filename)
 }
