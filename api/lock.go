@@ -24,6 +24,13 @@ func (lock) Add(c *gin.Context) {
 		return
 	}
 
+	var oldCount int64
+	db.Dao.Model(&model.Lock{}).Where("mac =?", params.MAC).Count(&oldCount)
+	if oldCount > 0 {
+		// 提示用户，该锁已经存在
+		Resp.Err(c, 20001, "该锁已经存在,请勿重复添加！")
+	}
+
 	var newLock = model.Lock{
 		StationId:       params.StationId,
 		AdminId:         params.AdminId,
@@ -229,29 +236,28 @@ func (lock) Command(c *gin.Context) {
 		Resp.Err(c, 20001, "密钥错误，请联系管理员重置该锁")
 		return
 	}
-	// 更新记录
-	if params.Cmd != nil {
-		// TODO 作废
-		if err := utils.ParseCommand(*params.Cmd, &record); err != nil {
-			Resp.Err(c, 20001, err.Error())
-			return
+	var newKey []byte
+	switch *params.Type {
+	case 0x10:
+		newKey, _ = hex.DecodeString(os.Getenv("LOCK_KEY"))
+		//if params.Key != nil {
+		//	newKey = *params.Key
+		//}
+		if len(newKey) != 16 {
+			Resp.Err(c, 20001, "密钥长度错误，请输入正确的16字节密钥")
+			break
 		}
-		// 更新数据库
-		if err := db.Dao.Where("id=?", params.Id).Updates(&record).Error; err != nil {
-			Resp.Err(c, 20001, err.Error())
-			return
-		}
-	}
-
-	if params.Type != nil {
+		fallthrough
+	case 0x01:
+		fallthrough
+	case 0x1F, 0xE0:
 		// 生成命令
-		newKey, _ := hex.DecodeString(os.Getenv("LOCK_KEY"))
 		newCommand := utils.GenerateCommand(*params.Type, params.Roll, mac, key, newKey)
 		Resp.Succ(c, inout.LockCommandRes{
 			Cmd: hex.EncodeToString(newCommand),
 			Key: hex.EncodeToString(newKey),
-		}) // TODO 改为前端解析的格式
-	} else {
-		Resp.Succ(c, "更新成功")
+		})
+	default:
+		Resp.Err(c, 20001, "指令类型错误")
 	}
 }

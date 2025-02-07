@@ -23,7 +23,7 @@ func Init() {
 			LogLevel:                  logger.Info,
 		},
 	)
-	openDb, err := gorm.Open(mysql.Open(os.Getenv("Mysql")), &gorm.Config{
+	openDb, err := gorm.Open(mysql.Open(os.Getenv("DATABASE_URL")), &gorm.Config{
 		Logger:                                   dbLogger,
 		DisableForeignKeyConstraintWhenMigrating: true,
 	})

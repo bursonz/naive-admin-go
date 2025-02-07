@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"log"
 	"naive-admin-go/model"
 	"time"
 )
@@ -25,7 +26,7 @@ func EncryptTEAFromBytes(plainText, key []byte) []byte {
 	if pad := len(text) % 8; pad != 0 {
 		text = append(text, make([]byte, 8-pad)...)
 	}
-	fmt.Println("Padding:" + hex.EncodeToString(text))
+	log.Println("指令补零:" + hex.EncodeToString(text))
 	// 分组加密
 	var sum, v1, v2 uint32
 	res := make([]byte, 0)
@@ -58,8 +59,9 @@ func getTimestamp() []byte {
 
 func GenerateCommand(cmd, roll byte, mac, key, newKey []byte) []byte {
 	var b []byte
+	// 生成命令
 	switch cmd {
-	case 0xE0, 0x01:
+	case 0x1F, 0xE0, 0x01:
 		b = make([]byte, 17)
 		// 基本信息, 不加密
 		b[0] = cmd
@@ -78,7 +80,8 @@ func GenerateCommand(cmd, roll byte, mac, key, newKey []byte) []byte {
 		b[3] = 0x1d
 		// 参数
 		copy(b[4:10], mac)
-		copy(b[10:26], newKey)         // 新密钥
+		copy(b[10:26], newKey) // 新密钥
+		log.Println("新密钥：" + hex.EncodeToString(newKey))
 		copy(b[26:32], getTimestamp()) // 时间戳
 	default:
 		return nil
@@ -89,11 +92,13 @@ func GenerateCommand(cmd, roll byte, mac, key, newKey []byte) []byte {
 		sum += a
 	}
 	b[len(b)-1] = sum
+	log.Println("明文命令：" + hex.EncodeToString(b) + " 长度：" + fmt.Sprintf("%d", len(b)) + " 字节")
 	// 加密
 	if b[0] != 0x01 {
 		// 加密 b[4:]
-		b = append(b[:4], EncryptTEAFromBytes(b[4:], key)...)
+		b = append(b[:4], EncryptTEAFromBytes(b[4:], key)...) // 不够8个字节的，会自动填充0
 	}
+	log.Println("加密命令：" + hex.EncodeToString(b) + " 长度：" + fmt.Sprintf("%d", len(b)) + " 字节")
 	return b
 }
 
