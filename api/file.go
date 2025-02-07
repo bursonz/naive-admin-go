@@ -19,14 +19,8 @@ func (file) Upload(c *gin.Context) {
 		Resp.Err(c, 20001, err.Error())
 		return
 	}
-	dst := "./uploads/"
-	// 检查并创建文件夹
-	if err = os.MkdirAll(dst, os.ModePerm); err != nil {
-		Resp.Err(c, 20001, err.Error())
-		return
-	}
 	// 保存文件到本地
-	if err = c.SaveUploadedFile(f, dst+filename); err != nil {
+	if err = c.SaveUploadedFile(f, "./uploads/"+filename); err != nil {
 		Resp.Err(c, 20001, err.Error())
 		return
 	} else {

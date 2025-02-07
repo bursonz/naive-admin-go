@@ -6,9 +6,17 @@ import (
 	"github.com/gin-gonic/gin"
 	"naive-admin-go/api"
 	"naive-admin-go/middleware"
+	"os"
 )
 
 func Init(r *gin.Engine) {
+	// 静态文件
+	if err := os.MkdirAll("./uploads", os.ModePerm); err != nil {
+		panic("无法创建文件夹" + err.Error())
+		return
+	}
+	r.Static("/uploads", "./uploads")
+
 	// 使用 cookie 存储会话数据
 	r.Use(sessions.Sessions("mysession", cookie.NewStore([]byte("captch"))))
 	r.Use(middleware.Cors())
