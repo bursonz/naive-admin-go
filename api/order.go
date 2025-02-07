@@ -162,7 +162,7 @@ func (order) List(c *gin.Context) {
 	Resp.Succ(c, data)
 }
 func (order) Delete(c *gin.Context) {
-	oid := c.Param("oid")
+	oid := c.Param("id")
 	if err := db.Dao.Transaction(func(tx *gorm.DB) error {
 		tx.Where("id =?", oid).Delete(&model.Order{})
 		tx.Where("order_id =?", oid).Delete(&model.OrderApproval{})

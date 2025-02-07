@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"naive-admin-go/db"
@@ -142,67 +143,91 @@ func (orderStep) Update(c *gin.Context) {
 			}
 			// 如果锁状态都为关，则更新工单步骤状态为已完成
 			if *params.LockStatus == LockStatusLocked {
-				var countUnlock int64
-				tx.Model(&model.OrderStep{}).Where("task =?", OrderStepTaskUnlock).Where("lock_status =?", LockStatusUnLock).Count(&countUnlock) // 查询所有未关锁的步骤数量
-				if countUnlock == 0 {                                                                                                            // 没有，即锁全部关闭
-					var countOrder int64
-					tx.Model(&model.Order{}).Where("id =?", params.OrderId).Where("status = ?", OrderConfirming).Count(&countOrder) // 查询当前工单状态是否为确认中
-					if countOrder != 0 {                                                                                            // 如果是，则更新工单步骤状态为已完成
-						// 更新工单步骤状态为已完成
-						err = orm.Update("status", OrderStepStatusReviewed).Error
-						if err != nil {
-							return err
-						}
+				var currentOrder model.Order
+				tx.Model(&model.Order{}).
+					Where("id =?", params.OrderId).
+					Select("status").
+					Find(&currentOrder)
+				if currentOrder.Status == OrderConfirming {
+					// 查询所有未关锁的步骤数量
+					var unlockCount int64
+					tx.Model(&model.OrderStep{}).
+						Where("order_id = ?", params.OrderId).
+						Where("task =?", OrderStepTaskUnlock).
+						Where("lock_status =?", LockStatusUnLock).
+						Count(&unlockCount)
+					if unlockCount == 0 { // 没有，即锁全部关闭
+						tx.Model(&model.Order{}).
+							Where("order_id =?", params.OrderId).
+							Update("status", OrderFinished)
 					}
 				}
 			}
 		}
 		if params.Status != nil {
-			err = orm.Update("status", params.Status).Error
-			if err != nil {
-				return err
-			}
-			// 获取当前步骤信息
-			var current model.OrderStep
-			orm.Select("order_id, task, status").Find(&current)
-			var expectStatus, targetStatus int
-			// 计算期望的状态和目标状态
-			switch current.Task {
-			case OrderStepTaskUnlock: // 执行
-				expectStatus = OrderStepStatusExecuted
-				targetStatus = OrderReviewing
-			case OrderStepTaskUploadConfirmImage, OrderStepTaskRetrieveStatusValue: // 审核
-				expectStatus = OrderStepStatusReviewed
-				targetStatus = OrderConfirming
-			case OrderStepTaskLock: // 确认
-				expectStatus = OrderStepStatusConfirmed
-				targetStatus = OrderFinished
-			}
-			// 如果当前步骤的状态等于期望的状态，且符合要求，则更新工单状态为目标状态
-			if current.Status == expectStatus {
-				var taskTotal, currentTotal int64
-				t := tx.Model(&model.OrderStep{}).Where("order_id =?", current.OrderId)
-				// 统计当前任务类型的所有步骤的数量
-				t.Where("task =?", current.Task).Count(&taskTotal)
-				// 统计当前任务类型的已完成步骤的数量
-				t.Where("status =?", expectStatus).Count(&currentTotal)
-				// 如果已完成步骤的数量等于总步骤数量，更新工单状态为审核中
-				if currentTotal == taskTotal {
-					err = tx.Model(&model.Order{}).Where("id =?", current.OrderId).Update("status", targetStatus).Error
-					if err != nil {
-						return err
+			// 判断工单状态，如果工单状态为确认中，则无需响应，直接返回
+			var currentOrder model.Order
+			tx.Model(&model.Order{}).Where("id =?", params.OrderId).Select("status").Find(&currentOrder)
+			switch currentOrder.Status {
+			case OrderRejected:
+				return errors.New("工单已被驳回，不能执行！")
+			case OrderApproving:
+				return errors.New("工单正在审核中，不能执行！")
+			case OrderExecuting:
+				switch *params.Status {
+				case OrderStepStatusExecuted:
+					// 执行中 -> 已执行:
+					// 判断工单步骤类型是否为审核图片上传或审核状态量
+					switch *params.Task {
+					case OrderStepTaskUploadConfirmImage, OrderStepTaskRetrieveStatusValue:
+						// 如果是，则更新工单步骤状态为待审核, 并更新工单状态为审核中
+						orm.Update("status", OrderStepStatusReviewing)
+						tx.Model(&model.Order{}).Where("id =?", params.OrderId).Update("status", OrderReviewing)
+					case OrderStepTaskUnlock, OrderStepTaskLock:
+						// 如果不是，则更新工单步骤状态为执行中
+						orm.Update("status", OrderStepStatusExecuted)
+					}
+				default:
+				}
+			case OrderReviewing:
+				switch *params.Status {
+				case OrderStepStatusReExecute: // 审核中 -> 重新执行
+					// 更新工单步骤状态为重新执行
+					orm.Update("status", OrderStepStatusReExecute)
+					// 更新工单步骤状态为执行中
+					tx.Model(&model.Order{}).Where("id =?", params.OrderId).Update("status", OrderExecuting)
+				case OrderStepStatusReviewed: // 审核中 -> 已审核
+					orm.Update("status", OrderStepStatusReviewed)
+					// 判断工单步骤类型
+					switch *params.Task {
+					case OrderStepTaskUploadConfirmImage: // 审核图片上传
+						var count int64
+						tx.Model(&model.OrderStep{}).
+							Where("id =?", params.OrderId).
+							Where("task =?", OrderStepTaskRetrieveStatusValue).
+							Count(&count)
+						if count != 0 {
+							tx.Model(&model.Order{}).Where("id =?", params.OrderId).Update("status", OrderExecuting)
+							break
+						}
+						fallthrough
+					case OrderStepTaskRetrieveStatusValue: // 审核状态量
+						tx.Model(&model.Order{}).Where("id =?", params.OrderId).Update("status", OrderConfirming)
 					}
 				}
+			case OrderConfirming:
+			case OrderFinished:
 			}
 		}
 		return nil
 	}); err != nil {
 		Resp.Err(c, 20001, err.Error())
 	} else {
-		Resp.Succ(c, err)
+		Resp.Succ(c, "更新成功")
 	}
 
 }
+
 func (orderStep) Delete(c *gin.Context) {
 	osid := c.Param("id")
 	if err := db.Dao.Transaction(func(tx *gorm.DB) error {
@@ -212,9 +237,10 @@ func (orderStep) Delete(c *gin.Context) {
 		Resp.Err(c, 20001, err.Error())
 		return
 	} else {
-		Resp.Succ(c, err)
+		Resp.Succ(c, "删除成功")
 	}
 }
+
 func (orderStep) BatchDelete(c *gin.Context) {
 	var params inout.BatchDeleteReq
 	if err := c.BindJSON(&params); err != nil {
