@@ -17,6 +17,9 @@ func LogMiddleware() gin.HandlerFunc {
 			c.Request.Body = io.NopCloser(bytes.NewBuffer(requestBody)) // 重新写入
 		}
 		c.Next()
+		if c.Request.Method == "POST" && (c.FullPath() == "/f" || c.FullPath() == "/f/") {
+			requestBody = []byte("file")
+		}
 		uid, _ := c.Get("uid")
 		uname, _ := c.Get("uname")
 		newLog := &model.SysLog{
