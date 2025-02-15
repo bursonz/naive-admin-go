@@ -117,25 +117,25 @@ func (order) List(c *gin.Context) {
 	}
 	orm = orm.Model(&model.Order{})
 	if id != "" {
-		orm = orm.Where("id like ?", "%"+id+"%")
+		orm = orm.Where("id like ?", id+"%")
 	}
 	if stationId != "" {
-		orm = orm.Where("station_id like ?", "%"+stationId+"%")
+		orm = orm.Where("station_id like ?", stationId+"%")
 	}
 	if status != "" {
-		orm = orm.Where("status like ?", "%"+status+"%")
+		orm = orm.Where("status like ?", status+"%")
 	}
 	if dispatcherId != "" {
-		orm = orm.Where("dispatcher_id like ?", "%"+dispatcherId+"%")
+		orm = orm.Where("dispatcher_id like ?", dispatcherId+"%")
 	}
 	if operatorId != "" {
-		orm = orm.Where("operator_id like ?", "%"+operatorId+"%")
+		orm = orm.Where("operator_id like ?", operatorId+"%")
 	}
 	if approverId != "" {
-		orm.Where("id in(?)", db.Dao.Model(&model.OrderApproval{}).Where("approver_id =?", approverId).Select("id"))
+		orm.Where("id in(?)", db.Dao.Model(&model.OrderApproval{}).Where("approver_id =?", approverId).Select("order_id"))
 	}
 	if reviewerId != "" {
-		orm.Where("id in(?)", db.Dao.Model(&model.OrderStep{}).Where("reviewer_id =?", reviewerId).Select("id"))
+		orm.Where("id in(?)", db.Dao.Model(&model.OrderStep{}).Where("reviewer_id =?", reviewerId).Select("order_id"))
 	}
 	// 查询总数
 	orm.Count(&data.Total)
