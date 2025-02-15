@@ -153,10 +153,10 @@ type PatchLockReq struct {
 
 type LockCommandReq struct {
 	Id   uint    `json:"id" binding:"required"`
-	Roll byte    `json:"roll"`
-	Type *byte   `json:"type,omitempty"`
-	Cmd  *[]byte `json:"cmd,omitempty"`
-	Key  *[]byte `json:"key,omitempty"` // newkey 需要变更的加密密钥
+	Type byte    `json:"type" binding:"required"` // 请求的数据类型
+	Roll byte    `json:"roll"`                    // 0x00-0x7f
+	Cmd  *string `json:"cmd,omitempty"`           // 02返回01的数据，13返回13的数据
+	Key  *string `json:"key,omitempty"`           // newkey 需要变更的加密密钥
 }
 
 type AddOrderReq struct {

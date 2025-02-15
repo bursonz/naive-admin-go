@@ -57,41 +57,47 @@ func getTimestamp() []byte {
 	return []byte{year, month, day, hour, minute, second}
 }
 
-func GenerateCommand(cmd, roll byte, mac, key, newKey []byte) []byte {
+// GenerateCommand 生成命令
+// data 是01、13的返回数据
+// 0x01 请求设备信息
+// 0x02 获取开锁记录
+// 0x03 删除终端开锁记录
+// 0x10 更新密钥
+// 0x13 回复锁记录
+// 0x1F 终端复位
+// 0xE0 开锁
+func GenerateCommand(cmdType, roll byte, mac, key, newKey, data []byte) []byte {
 	var b []byte
+	b = append(b, cmdType, roll, 0x00, 0x00) // 4 基本信息，不加密
+	b = append(b, mac...)                    // 6 mac
 	// 生成命令
-	switch cmd {
-	case 0x1F, 0xE0, 0x01:
-		b = make([]byte, 17)
-		// 基本信息, 不加密
-		b[0] = cmd
-		b[1] = roll
-		b[2] = 0x00
-		b[3] = 0x0d
-		// 参数
-		copy(b[4:10], mac)
-		copy(b[10:16], getTimestamp()) // 时间戳
-	case 0x10:
-		b = make([]byte, 33)
-		// 基本信息, 不加密
-		b[0] = cmd
-		b[1] = roll
-		b[2] = 0x00
-		b[3] = 0x1d
-		// 参数
-		copy(b[4:10], mac)
-		copy(b[10:26], newKey) // 新密钥
+	switch cmdType {
+	case 0x01, 0x03, 0x1F, 0xE0: // 17
+		b = append(b, getTimestamp()...) // 6 时间戳
+	case 0x02: // 20 = 10 +2 +1 +6 +1
+		b = append(b, data[24:26]...)    // 2 开始位置
+		b = append(b, data[25:26]...)    // 1 本次上传N个记录
+		b = append(b, getTimestamp()...) // 6 时间戳
+	case 0x10: // 33
 		log.Println("新密钥：" + hex.EncodeToString(newKey))
-		copy(b[26:32], getTimestamp()) // 时间戳
+		b = append(b, newKey...)         // 16 新密钥
+		b = append(b, getTimestamp()...) // 6 时间戳
+	case 0x13: // 18 = 10+1+6+1
+		b = append(b, 0x01)           // 1 确认码
+		b = append(b, data[10:16]...) // 6 开锁时间
 	default:
 		return nil
 	}
+	// 长度
+	blen := uint16(len(b) + 1 - 4) // 长度 + 1位校验 - 4位基本信息
+	b[2] = byte(blen >> 8)         // 取高8位
+	b[3] = byte(blen)              // 取低8位
 	// 校验和
 	sum := byte(0x00)
-	for _, a := range b[:len(b)-1] {
+	for _, a := range b {
 		sum += a
 	}
-	b[len(b)-1] = sum
+	b = append(b, sum)
 	log.Println("明文命令：" + hex.EncodeToString(b) + " 长度：" + fmt.Sprintf("%d", len(b)) + " 字节")
 	// 加密
 	if b[0] != 0x01 {

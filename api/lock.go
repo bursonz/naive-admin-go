@@ -236,25 +236,28 @@ func (lock) Command(c *gin.Context) {
 		Resp.Err(c, 20001, "密钥错误，请联系管理员重置该锁")
 		return
 	}
+	var oldCmd []byte
+	if params.Cmd != nil && *params.Cmd != "" {
+		oldCmd, _ = hex.DecodeString(*params.Cmd)
+	}
 	var newKey []byte
-	switch *params.Type {
+	switch params.Type {
 	case 0x10:
-		newKey, _ = hex.DecodeString(os.Getenv("LOCK_KEY"))
-		//if params.Key != nil {
-		//	newKey = *params.Key
-		//}
+		if params.Key != nil && *params.Key != "" {
+			newKey, _ = hex.DecodeString(*params.Key)
+		} else {
+			newKey, _ = hex.DecodeString(os.Getenv("LOCK_KEY"))
+		}
 		if len(newKey) != 16 {
 			Resp.Err(c, 20001, "密钥长度错误，请输入正确的16字节密钥")
 			break
 		}
 		fallthrough
-	case 0x01:
-		fallthrough
-	case 0x1F, 0xE0:
+	case 0x01, 0x02, 0x03, 0x13, 0x1F, 0xE0:
 		// 生成命令
-		newCommand := utils.GenerateCommand(*params.Type, params.Roll, mac, key, newKey)
+		newCmd := utils.GenerateCommand(params.Type, params.Roll, mac, key, newKey, oldCmd)
 		Resp.Succ(c, inout.LockCommandRes{
-			Cmd: hex.EncodeToString(newCommand),
+			Cmd: hex.EncodeToString(newCmd),
 			Key: hex.EncodeToString(newKey),
 		})
 	default:
