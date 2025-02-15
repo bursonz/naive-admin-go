@@ -141,28 +141,29 @@ func (orderStep) Update(c *gin.Context) {
 			if err != nil {
 				return err
 			}
+			// TODO 应该删除这部分，改为前端实现工单结束
 			// 如果锁状态都为关，则更新工单步骤状态为已完成
-			if *params.LockStatus == LockStatusLocked {
-				var currentOrder model.Order
-				tx.Model(&model.Order{}).
-					Where("id =?", params.OrderId).
-					Select("status").
-					Find(&currentOrder)
-				if currentOrder.Status == OrderConfirming {
-					// 查询所有未关锁的步骤数量
-					var unlockCount int64
-					tx.Model(&model.OrderStep{}).
-						Where("order_id = ?", params.OrderId).
-						Where("task =?", OrderStepTaskUnlock).
-						Where("lock_status =?", LockStatusUnLock).
-						Count(&unlockCount)
-					if unlockCount == 0 { // 没有，即锁全部关闭
-						tx.Model(&model.Order{}).
-							Where("order_id =?", params.OrderId).
-							Update("status", OrderFinished)
-					}
-				}
-			}
+			//if *params.LockStatus == LockStatusLocked {
+			//	var currentOrder model.Order
+			//	tx.Model(&model.Order{}).
+			//		Where("id =?", params.OrderId).
+			//		Select("status").
+			//		Find(&currentOrder)
+			//	if currentOrder.Status == OrderConfirming {
+			//		// 查询所有未关锁的步骤数量
+			//		var unlockCount int64
+			//		tx.Model(&model.OrderStep{}).
+			//			Where("order_id = ?", params.OrderId).
+			//			Where("task =?", OrderStepTaskUnlock).
+			//			Where("lock_status =?", LockStatusUnLock).
+			//			Count(&unlockCount)
+			//		if unlockCount == 0 { // 没有，即锁全部关闭
+			//			tx.Model(&model.Order{}).
+			//				Where("order_id =?", params.OrderId).
+			//				Update("status", OrderFinished)
+			//		}
+			//	}
+			//}
 		}
 		if params.Status != nil {
 			// 判断工单状态，如果工单状态为确认中，则无需响应，直接返回
@@ -203,7 +204,7 @@ func (orderStep) Update(c *gin.Context) {
 					case OrderStepTaskUploadConfirmImage: // 审核图片上传
 						var count int64
 						tx.Model(&model.OrderStep{}).
-							Where("id =?", params.OrderId).
+							Where("order_id =?", params.OrderId).
 							Where("task =?", OrderStepTaskRetrieveStatusValue).
 							Count(&count)
 						if count != 0 {
