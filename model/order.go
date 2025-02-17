@@ -22,6 +22,9 @@ type Order struct {
 
 	// 工单步骤列表
 	OrderSteps []OrderStep `json:"orderSteps" gorm:"foreignKey:OrderId"`
+
+	// 工单内容
+	Content string `json:"content" gorm:"type:text;comment:工单内容"`
 }
 
 func (order Order) TableName() string { return "order" }

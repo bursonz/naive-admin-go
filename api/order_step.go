@@ -79,6 +79,7 @@ func (orderStep) Add(c *gin.Context) {
 			LockStatus: params.LockStatus,
 			ImageUrl:   params.ImageUrl,
 			Comment:    params.Comment,
+			SwitchId:   params.SwitchId,
 		}
 		if err := tx.Model(&model.OrderStep{}).Create(&newOrderStep).Error; err != nil {
 			return err
@@ -132,6 +133,12 @@ func (orderStep) Update(c *gin.Context) {
 		}
 		if params.ReviewerId != nil {
 			err = orm.Update("reviewer_id", params.ReviewerId).Error
+			if err != nil {
+				return err
+			}
+		}
+		if params.SwitchId != nil {
+			err = orm.Update("switch_id", params.SwitchId).Error
 			if err != nil {
 				return err
 			}

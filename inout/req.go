@@ -166,13 +166,15 @@ type AddOrderReq struct {
 	Status         int                    `json:"status" binding:"required"`
 	OrderApprovals []*AddOrderApprovalReq `json:"orderApprovals"`
 	OrderSteps     []*AddOrderStepReq     `json:"orderSteps"`
+	Content        string                 `json:"content"`
 }
 type PatchOrderReq struct {
-	Id           int   `json:"id" binding:"required"`
-	DispatcherId *uint `json:"dispatcherId"` // 派单人id
-	OperatorId   *uint `json:"operatorId"`   // 操作员id
-	StationId    *uint `json:"stationId"`    // 站点id
-	Status       *int  `json:"status"`       // 工单状态
+	Id           int     `json:"id" binding:"required"`
+	DispatcherId *uint   `json:"dispatcherId"` // 派单人id
+	OperatorId   *uint   `json:"operatorId"`   // 操作员id
+	StationId    *uint   `json:"stationId"`    // 站点id
+	Status       *int    `json:"status"`       // 工单状态
+	Content      *string `json:"content"`
 }
 type AddOrderApprovalReq struct {
 	OrderId    uint    `json:"orderId" binding:"required"`
@@ -199,6 +201,7 @@ type AddOrderStepReq struct {
 	LockStatus *int    `json:"lockStatus"` // 锁状态 1:开锁 2:关锁
 	ImageUrl   *string `json:"imageUrl"`   // 图片url
 	Comment    *string `json:"comment"`    // 状态量
+	SwitchId   *string `json:"switchId"`   // 闸刀id
 }
 type PatchOrderStepReq struct {
 	Id         uint  `json:"id" binding:"required"`
@@ -212,6 +215,7 @@ type PatchOrderStepReq struct {
 	LockStatus *int    `json:"lockStatus"` // 锁状态 1:开锁 2:关锁
 	ImageUrl   *string `json:"imageUrl"`   // 图片url
 	Comment    *string `json:"comment"`    // 状态量
+	SwitchId   *string `json:"switchId"`   // 闸刀id
 }
 
 type BatchDeleteReq struct {

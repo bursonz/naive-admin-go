@@ -26,6 +26,7 @@ func (order) Add(c *gin.Context) {
 			StationId:    params.StationId,
 			Status:       OrderApproving,
 			OperatorId:   params.OperatorId,
+			Content:      params.Content,
 		}
 		if err := tx.Create(&newOrder).Error; err != nil {
 			return err
@@ -55,6 +56,7 @@ func (order) Add(c *gin.Context) {
 				LockStatus: step.LockStatus,
 				ImageUrl:   step.ImageUrl,
 				Comment:    step.Comment,
+				SwitchId:   step.SwitchId,
 			}
 			if err := tx.Create(&newStep).Error; err != nil {
 				return err
@@ -89,6 +91,9 @@ func (order) Update(c *gin.Context) {
 	}
 	if params.Status != nil {
 		orm = orm.Update("status", params.Status)
+	}
+	if params.Content != nil {
+		orm = orm.Update("content", params.Content)
 	}
 	if err := orm.Error; err != nil {
 		Resp.Err(c, 20001, err.Error())

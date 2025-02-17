@@ -6,8 +6,8 @@ type Lock struct {
 	StationId   uint   `json:"stationId" gorm:"type:bigint unsigned;not null;index;comment:站点id"`
 	AdminId     uint   `json:"adminId" gorm:"type:bigint unsigned;not null;index;comment:管理员id"`
 	Name        string `json:"name" gorm:"type:varchar(32);notNull;uniqueIndex:idx_lock_name;comment:锁名称"`
-	Location    string `json:"location" gorm:"type:varchar(255);default:null;comment:锁具位置"`
-	Description string `json:"description" gorm:"type:varchar(255);default:null;comment:锁具描述"`
+	Location    string `json:"location" gorm:"type:text;default:null;comment:锁具位置"`
+	Description string `json:"description" gorm:"type:text;default:null;comment:锁具描述"`
 	// 设备信息
 	SN         string `json:"sn" gorm:"type:varchar(8);uniqueIndex:idx_lock_sn;not null;comment:序列号"`
 	Mac        string `json:"mac" gorm:"type:varchar(12);uniqueIndex:idx_lock_mac;not null;comment:MAC地址"`
