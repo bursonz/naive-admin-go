@@ -173,7 +173,7 @@ func (orderStep) Update(c *gin.Context) {
 			case OrderRejected:
 				return errors.New("工单已被驳回，不能执行！")
 			case OrderApproving:
-				return errors.New("工单正在审核中，不能执行！")
+				return errors.New("工单正在审批中，不能执行！")
 			case OrderExecuting:
 				switch *params.Status {
 				case OrderStepStatusExecuted:
@@ -197,24 +197,45 @@ func (orderStep) Update(c *gin.Context) {
 					orm.Update("status", OrderStepStatusReExecute)
 					// 更新工单步骤状态为执行中
 					tx.Model(&model.Order{}).Where("id =?", params.OrderId).Update("status", OrderExecuting)
+
+					// TODO删除工单步骤中的记录
+					// 判断类型是否为审核图片上传
+					//if *params.Task == OrderStepTaskUploadConfirmImage {
+					//	// 删除工单步骤中的文件及记录
+					//	var filename string
+					//	tx.Model(&model.OrderStep{}).
+					//		Where("id =?", params.Id).Find(&filename)
+					//}
 				case OrderStepStatusReviewed: // 审核中 -> 已审核
 					orm.Update("status", OrderStepStatusReviewed)
-					// 判断工单步骤类型
-					switch *params.Task {
-					case OrderStepTaskUploadConfirmImage: // 审核图片上传
-						var count int64
-						tx.Model(&model.OrderStep{}).
-							Where("order_id =?", params.OrderId).
-							Where("task =?", OrderStepTaskRetrieveStatusValue).
-							Count(&count)
-						if count != 0 {
-							tx.Model(&model.Order{}).Where("id =?", params.OrderId).Update("status", OrderExecuting)
-							break
-						}
-						fallthrough
-					case OrderStepTaskRetrieveStatusValue: // 审核状态量
+					var totalCount, currentCount int64
+					tx.Model(&model.OrderStep{}).
+						Where("order_id =?", params.OrderId).
+						Count(&totalCount).
+						Where("status in (?)", []int{OrderStepStatusReviewed, OrderStepStatusExecuted}).
+						Count(&currentCount)
+					// 如果所有步骤都已审核或执行，则更新工单状态为确认中
+					if totalCount == currentCount {
 						tx.Model(&model.Order{}).Where("id =?", params.OrderId).Update("status", OrderConfirming)
+					} else { // 否则更新工单状态为执行中
+						tx.Model(&model.Order{}).Where("id =?", params.OrderId).Update("status", OrderExecuting)
 					}
+					// 判断工单步骤类型
+					//switch *params.Task {
+					//case OrderStepTaskUploadConfirmImage: // 审核图片上传
+					//	var count int64
+					//	tx.Model(&model.OrderStep{}).
+					//		Where("order_id =?", params.OrderId).
+					//		Where("task =?", OrderStepTaskRetrieveStatusValue).
+					//		Count(&count)
+					//	if count != 0 {
+					//		//tx.Model(&model.Order{}).Where("id =?", params.OrderId).Update("status", OrderExecuting)
+					//		break
+					//	}
+					//	fallthrough
+					//case OrderStepTaskRetrieveStatusValue: // 审核状态量
+					//	//tx.Model(&model.Order{}).Where("id =?", params.OrderId).Update("status", OrderConfirming)
+					//}
 				}
 			case OrderConfirming:
 			case OrderFinished:
